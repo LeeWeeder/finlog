@@ -1,4 +1,4 @@
-package com.example.test
+package com.leeweeder.finlog.ui.icons
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathFillType
@@ -10,12 +10,12 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-public val arrow_back: ImageVector
+val arrowBack: ImageVector
   get() {
-    if (_arrow_back != null) {
-      return _arrow_back!!
+    if (_arrowBack != null) {
+      return _arrowBack!!
     }
-    _arrow_back =
+    _arrowBack =
       ImageVector.Builder(
           name = "arrow_back",
           defaultWidth = 24.dp,
@@ -33,7 +33,7 @@ public val arrow_back: ImageVector
             strokeLineCap = StrokeCap.Butt,
             strokeLineJoin = StrokeJoin.Bevel,
             strokeLineMiter = 1f,
-            pathFillType = PathFillType.Companion.NonZero,
+            pathFillType = PathFillType.NonZero,
           ) {
             moveTo(7.83f, 13f)
             lineToRelative(4.9f, 4.9f)
@@ -62,7 +62,8 @@ public val arrow_back: ImageVector
           }
         }
         .build()
-    return _arrow_back!!
+    return _arrowBack!!
   }
 
-private var _arrow_back: ImageVector? = null
+@Suppress("ObjectPropertyName")
+private var _arrowBack: ImageVector? = null

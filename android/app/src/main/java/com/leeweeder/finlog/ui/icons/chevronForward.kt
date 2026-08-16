@@ -1,4 +1,4 @@
-package com.example.test
+package com.leeweeder.finlog.ui.icons
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathFillType
@@ -10,12 +10,12 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-public val chevron_forward: ImageVector
+val chevronForward: ImageVector
   get() {
-    if (_chevron_forward != null) {
-      return _chevron_forward!!
+    if (_chevronForward != null) {
+      return _chevronForward!!
     }
-    _chevron_forward =
+    _chevronForward =
       ImageVector.Builder(
           name = "chevron_forward",
           defaultWidth = 24.dp,
@@ -33,7 +33,7 @@ public val chevron_forward: ImageVector
             strokeLineCap = StrokeCap.Butt,
             strokeLineJoin = StrokeJoin.Bevel,
             strokeLineMiter = 1f,
-            pathFillType = PathFillType.Companion.NonZero,
+            pathFillType = PathFillType.NonZero,
           ) {
             moveTo(12.6f, 12f)
             lineTo(8.7f, 8.1f)
@@ -56,7 +56,8 @@ public val chevron_forward: ImageVector
           }
         }
         .build()
-    return _chevron_forward!!
+    return _chevronForward!!
   }
 
-private var _chevron_forward: ImageVector? = null
+@Suppress("ObjectPropertyName")
+private var _chevronForward: ImageVector? = null

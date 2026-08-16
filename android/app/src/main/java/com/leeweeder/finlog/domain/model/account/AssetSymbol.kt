@@ -1,3 +1,10 @@
 package com.leeweeder.finlog.domain.model.account
 
-data class AssetSymbol()
+@JvmInline
+internal value class AssetSymbol private constructor(val value: String) {
+    companion object {
+        fun of(raw: String): AssetSymbol = AssetSymbol(raw.uppercase().replace(" ", ""))
+
+        val EMPTY = AssetSymbol("")
+    }
+}

@@ -1,6 +1,7 @@
 package com.leeweeder.finlog.domain.repository
 
 import com.leeweeder.finlog.domain.model.account.FiatAccountType
+import kotlinx.coroutines.flow.Flow
 
 interface AccountRepository {
     suspend fun insertFiatAccount(

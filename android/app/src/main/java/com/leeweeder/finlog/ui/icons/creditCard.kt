@@ -10,12 +10,12 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-public val credit_card: ImageVector
+internal val creditCard: ImageVector
   get() {
-    if (_credit_card != null) {
-      return _credit_card!!
+    if (_creditCard != null) {
+      return _creditCard!!
     }
-    _credit_card =
+    _creditCard =
       ImageVector.Builder(
           name = "credit_card",
           defaultWidth = 24.dp,
@@ -68,7 +68,8 @@ public val credit_card: ImageVector
           }
         }
         .build()
-    return _credit_card!!
+    return _creditCard!!
   }
 
-private var _credit_card: ImageVector? = null
+@Suppress("ObjectPropertyName")
+private var _creditCard: ImageVector? = null

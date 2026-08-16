@@ -29,7 +29,8 @@ internal class AccountRepositoryImpl @Inject constructor(
                     type = AccountType.FiatAccount,
                     name = name,
                     isIncludedInNetBalance = isIncludedInNetBalance,
-                    isArchived = isArchived
+                    isArchived = isArchived,
+                    iconKey = "wallet"
                 )
             )
 

@@ -10,12 +10,12 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-public val currency_bitcoin: ImageVector
+internal val currencyBitcoin: ImageVector
   get() {
-    if (_currency_bitcoin != null) {
-      return _currency_bitcoin!!
+    if (_currencyBitcoin != null) {
+      return _currencyBitcoin!!
     }
-    _currency_bitcoin =
+    _currencyBitcoin =
       ImageVector.Builder(
           name = "currency_bitcoin",
           defaultWidth = 24.dp,
@@ -105,7 +105,8 @@ public val currency_bitcoin: ImageVector
           }
         }
         .build()
-    return _currency_bitcoin!!
+    return _currencyBitcoin!!
   }
 
-private var _currency_bitcoin: ImageVector? = null
+@Suppress("ObjectPropertyName")
+private var _currencyBitcoin: ImageVector? = null

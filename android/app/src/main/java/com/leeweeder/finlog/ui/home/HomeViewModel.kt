@@ -1,4 +1,5 @@
 package com.leeweeder.finlog.ui.home
 
-class HomeViewModel {
-}
+import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+

@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-16T08:49:54.263Z",
+  "fiatCurrencies": [
+    {
+      "code": "PHP",
+      "name": "Philippine Peso",
+      "digits": 2
+    },
+    {
+      "code": "USD",
+      "name": "US Dollar",
+      "digits": 2
+    },
+    {
+      "code": "EUR",
+      "name": "Euro",
+      "digits": 2
+    }
+  ],
+  "cryptoCurrencies": [
+    {
+      "code": "BTC",
+      "name": "Bitcoin"
+    },
+    {
+      "code": "ETH",
+      "name": "Ethereum"
+    }
+  ]
+}

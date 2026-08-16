@@ -1,4 +1,4 @@
-package com.example.test
+package com.leeweeder.finlog.ui.icons
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathFillType
@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-public val wallet: ImageVector
+internal val wallet: ImageVector
   get() {
     if (_wallet != null) {
       return _wallet!!
@@ -33,7 +33,7 @@ public val wallet: ImageVector
             strokeLineCap = StrokeCap.Butt,
             strokeLineJoin = StrokeJoin.Bevel,
             strokeLineMiter = 1f,
-            pathFillType = PathFillType.Companion.NonZero,
+            pathFillType = PathFillType.NonZero,
           ) {
             moveTo(6f, 20f)
             quadTo(4.35f, 20f, 3.18f, 18.83f)
@@ -80,4 +80,5 @@ public val wallet: ImageVector
     return _wallet!!
   }
 
+@Suppress("ObjectPropertyName")
 private var _wallet: ImageVector? = null
