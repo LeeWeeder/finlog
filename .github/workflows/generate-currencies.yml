@@ -1,4 +1,4 @@
-name: Generate shared/currencies.json
+name: Generate currencies.json
 
 on: 
   pull_request:
