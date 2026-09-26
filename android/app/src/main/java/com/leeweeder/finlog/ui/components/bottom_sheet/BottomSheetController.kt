@@ -5,20 +5,20 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetState
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 
-internal class BottomSheetState {
+internal class BottomSheetController {
     var isVisible by mutableStateOf(false)
         private set
     var content by mutableStateOf<@Composable () -> Unit>({})
-        private  set
+        private set
 
     fun show(content: @Composable () -> Unit) {
         this.content = content
@@ -30,30 +30,41 @@ internal class BottomSheetState {
     }
 }
 
-internal val LocalBottomSheetState = staticCompositionLocalOf<BottomSheetState> {
+internal val LocalBottomSheetController = staticCompositionLocalOf<BottomSheetController> {
     error("No BottomSheetState provided — wrap your root composable with FinLogBottomSheetProvider.")
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun FinLogBottomSheetProvider(content: @Composable () -> Unit) {
-    val sheetState = remember { BottomSheetState() }
+    val controller = remember { BottomSheetController() }
     val modalSheetState = rememberBottomSheetState(
         initialValue = SheetValue.Hidden
     )
 
-    CompositionLocalProvider(LocalBottomSheetState provides sheetState) {
+    var isSheetVisible by remember { mutableStateOf(controller.isVisible) }
+
+    LaunchedEffect(controller.isVisible) {
+        if (controller.isVisible) {
+            isSheetVisible = true
+        } else {
+            modalSheetState.hide()
+            isSheetVisible = false
+        }
+    }
+
+    CompositionLocalProvider(LocalBottomSheetController provides controller) {
         Box {
             content()
 
-            if (sheetState.isVisible) {
+            if (isSheetVisible) {
                 ModalBottomSheet(
                     onDismissRequest = {
-                        sheetState.hide()
+                        controller.hide()
                     },
                     sheetState = modalSheetState
                 ) {
-                    sheetState.content()
+                    controller.content()
                 }
             }
         }
