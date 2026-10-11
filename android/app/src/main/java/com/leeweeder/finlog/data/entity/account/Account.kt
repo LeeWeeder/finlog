@@ -9,8 +9,9 @@ internal data class Account(
     val type: AccountType,
     val name: String,
     val isIncludedInNetBalance: Boolean,
-    val isArchived: Boolean,
-    val iconKey: String
+    val isArchived: Boolean = false,
+    val iconKey: String,
+    val decimalPlaces: Int
 ) {
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0

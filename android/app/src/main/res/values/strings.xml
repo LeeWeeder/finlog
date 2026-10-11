@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">finlog</string>
+    <plurals name="decimal_places">
+        <item quantity="one">%d decimal</item>
+        <item quantity="other">%d decimals</item>
+    </plurals>
 </resources>

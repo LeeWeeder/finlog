@@ -9,6 +9,15 @@ interface AccountRepository {
         name: String,
         fiatAccountType: FiatAccountType,
         isIncludedInNetBalance: Boolean,
-        isArchived: Boolean
+        decimalPlaces: Int,
+        iconKey: String
+    )
+
+    suspend fun insertCryptoAccount(
+        assetSymbol: String,
+        name: String,
+        isIncludedInNetBalance: Boolean,
+        decimalPlaces: Int,
+        iconKey: String
     )
 }
