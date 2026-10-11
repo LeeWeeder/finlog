@@ -17,6 +17,9 @@ import com.leeweeder.finlog.domain.model.account.FiatAccountType
 internal data class DebitAccount(
     @PrimaryKey
     override val accountId: Long,
-    override val currencyCode: String,
+    override val currencyCode: String
+) : FiatAccount, AccountSubtype {
+
     override val fiatAccountType: FiatAccountType
-) : FiatAccount, AccountSubtype
+        get() = FiatAccountType.Debit
+}

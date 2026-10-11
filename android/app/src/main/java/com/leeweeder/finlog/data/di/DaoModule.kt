@@ -1,7 +1,9 @@
 package com.leeweeder.finlog.data.di
 
 import com.leeweeder.finlog.data.FinLogDatabase
+import com.leeweeder.finlog.data.dao.TransactionDao
 import com.leeweeder.finlog.data.dao.account.AccountDao
+import com.leeweeder.finlog.data.dao.account.CreditAccountDao
 import com.leeweeder.finlog.data.dao.account.DebitAccountDao
 import dagger.Module
 import dagger.Provides
@@ -20,4 +22,14 @@ internal object DaoModule {
     fun providesDebitAccountDao(
         finLogDatabase: FinLogDatabase
     ): DebitAccountDao = finLogDatabase.debitAccountDao()
+
+    @Provides
+    fun providesCreditAccountDao(
+        finLogDatabase: FinLogDatabase
+    ): CreditAccountDao = finLogDatabase.creditAccountDao()
+
+    @Provides
+    fun providesTransactionDao(
+        finLogDatabase: FinLogDatabase
+    ): TransactionDao = finLogDatabase.transactionDao()
 }

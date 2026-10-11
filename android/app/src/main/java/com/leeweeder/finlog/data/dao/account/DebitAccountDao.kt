@@ -5,7 +5,7 @@ import androidx.room3.Insert
 import com.leeweeder.finlog.data.entity.account.DebitAccount
 
 @Dao
-internal interface DebitAccountDao {
+internal interface DebitAccountDao : FiatAccountDao<DebitAccount> {
     @Insert
-    suspend fun insert(debitAccount: DebitAccount)
+    override suspend fun insert(account: DebitAccount)
 }
