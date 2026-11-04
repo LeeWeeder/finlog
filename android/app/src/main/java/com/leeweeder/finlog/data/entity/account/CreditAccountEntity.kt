@@ -6,15 +6,16 @@ import androidx.room3.PrimaryKey
 import com.leeweeder.finlog.domain.model.account.FiatAccountType
 
 @Entity(
+    tableName = "credit_accounts",
     foreignKeys = [ForeignKey(
-        entity = Account::class,
+        entity = AccountEntity::class,
         parentColumns = ["id"],
         childColumns = ["accountId"],
         onDelete = ForeignKey.CASCADE,
         onUpdate = ForeignKey.CASCADE
     )]
 )
-internal data class CreditAccount(
+internal data class CreditAccountEntity(
     @PrimaryKey
     override val accountId: Long,
     override val currencyCode: String

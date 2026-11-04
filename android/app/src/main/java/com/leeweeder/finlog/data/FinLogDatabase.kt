@@ -7,19 +7,19 @@ import com.leeweeder.finlog.data.dao.TransactionDao
 import com.leeweeder.finlog.data.dao.account.AccountDao
 import com.leeweeder.finlog.data.dao.account.CreditAccountDao
 import com.leeweeder.finlog.data.dao.account.DebitAccountDao
-import com.leeweeder.finlog.data.entity.Transaction
-import com.leeweeder.finlog.data.entity.account.Account
-import com.leeweeder.finlog.data.entity.account.CreditAccount
-import com.leeweeder.finlog.data.entity.account.CryptoAccount
-import com.leeweeder.finlog.data.entity.account.DebitAccount
+import com.leeweeder.finlog.data.entity.TransactionEntity
+import com.leeweeder.finlog.data.entity.account.AccountEntity
+import com.leeweeder.finlog.data.entity.account.CreditAccountEntity
+import com.leeweeder.finlog.data.entity.account.CryptoAccountEntity
+import com.leeweeder.finlog.data.entity.account.DebitAccountEntity
 
 @Database(
     entities = [
-        Account::class,
-        DebitAccount::class,
-        CreditAccount::class,
-        CryptoAccount::class,
-        Transaction::class
+        AccountEntity::class,
+        DebitAccountEntity::class,
+        CreditAccountEntity::class,
+        CryptoAccountEntity::class,
+        TransactionEntity::class
     ], version = 1,
     exportSchema = true
 )

@@ -10,6 +10,13 @@ value class Amount(val value: BigDecimal) {
     val display: String
         get() = value.toPlainString()
 
+    fun isNegative(): Boolean = value.signum() < 0
+
     operator fun plus(other: Amount) = Amount(value + other.value)
     operator fun minus(other: Amount) = Amount(value - other.value)
+    operator fun unaryMinus() = Amount(value.negate())
+
+    companion object {
+        val ZERO = Amount(BigDecimal(0))
+    }
 }

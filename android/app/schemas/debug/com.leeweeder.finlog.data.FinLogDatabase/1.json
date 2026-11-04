@@ -2,10 +2,10 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "963044f717e2783cf629973cd773924d",
+    "identityHash": "697150e6f41d8f432a6cb3be98999e03",
     "entities": [
       {
-        "tableName": "Account",
+        "tableName": "accounts",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`type` TEXT NOT NULL, `name` TEXT NOT NULL, `isIncludedInNetBalance` INTEGER NOT NULL, `isArchived` INTEGER NOT NULL, `iconKey` TEXT NOT NULL, `decimalPlaces` INTEGER NOT NULL, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL)",
         "fields": [
           {
@@ -59,8 +59,8 @@
         }
       },
       {
-        "tableName": "DebitAccount",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`accountId` INTEGER NOT NULL, `currencyCode` TEXT NOT NULL, PRIMARY KEY(`accountId`), FOREIGN KEY(`accountId`) REFERENCES `Account`(`id`) ON UPDATE CASCADE ON DELETE CASCADE )",
+        "tableName": "debit_accounts",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`accountId` INTEGER NOT NULL, `currencyCode` TEXT NOT NULL, PRIMARY KEY(`accountId`), FOREIGN KEY(`accountId`) REFERENCES `accounts`(`id`) ON UPDATE CASCADE ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "accountId",
@@ -83,7 +83,7 @@
         },
         "foreignKeys": [
           {
-            "table": "Account",
+            "table": "accounts",
             "onDelete": "CASCADE",
             "onUpdate": "CASCADE",
             "columns": [
@@ -96,8 +96,8 @@
         ]
       },
       {
-        "tableName": "CreditAccount",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`accountId` INTEGER NOT NULL, `currencyCode` TEXT NOT NULL, PRIMARY KEY(`accountId`), FOREIGN KEY(`accountId`) REFERENCES `Account`(`id`) ON UPDATE CASCADE ON DELETE CASCADE )",
+        "tableName": "credit_accounts",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`accountId` INTEGER NOT NULL, `currencyCode` TEXT NOT NULL, PRIMARY KEY(`accountId`), FOREIGN KEY(`accountId`) REFERENCES `accounts`(`id`) ON UPDATE CASCADE ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "accountId",
@@ -120,7 +120,7 @@
         },
         "foreignKeys": [
           {
-            "table": "Account",
+            "table": "accounts",
             "onDelete": "CASCADE",
             "onUpdate": "CASCADE",
             "columns": [
@@ -133,8 +133,8 @@
         ]
       },
       {
-        "tableName": "CryptoAccount",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`accountId` INTEGER NOT NULL, `assetSymbol` TEXT NOT NULL, PRIMARY KEY(`accountId`), FOREIGN KEY(`accountId`) REFERENCES `Account`(`id`) ON UPDATE CASCADE ON DELETE CASCADE )",
+        "tableName": "crypto_accounts",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`accountId` INTEGER NOT NULL, `assetSymbol` TEXT NOT NULL, PRIMARY KEY(`accountId`), FOREIGN KEY(`accountId`) REFERENCES `accounts`(`id`) ON UPDATE CASCADE ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "accountId",
@@ -157,7 +157,7 @@
         },
         "foreignKeys": [
           {
-            "table": "Account",
+            "table": "accounts",
             "onDelete": "CASCADE",
             "onUpdate": "CASCADE",
             "columns": [
@@ -170,8 +170,8 @@
         ]
       },
       {
-        "tableName": "Transaction",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`accountId` INTEGER NOT NULL, `amount` TEXT NOT NULL, `transactionType` TEXT NOT NULL, `createdAtMillis` INTEGER NOT NULL, `postedAtMillis` INTEGER, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, FOREIGN KEY(`accountId`) REFERENCES `Account`(`id`) ON UPDATE CASCADE ON DELETE CASCADE )",
+        "tableName": "transactions",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`accountId` INTEGER NOT NULL, `amount` TEXT NOT NULL, `transactionType` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `postedAt` INTEGER, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, FOREIGN KEY(`accountId`) REFERENCES `accounts`(`id`) ON UPDATE CASCADE ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "accountId",
@@ -192,14 +192,14 @@
             "notNull": true
           },
           {
-            "fieldPath": "createdAtMillis",
-            "columnName": "createdAtMillis",
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "postedAtMillis",
-            "columnName": "postedAtMillis",
+            "fieldPath": "postedAt",
+            "columnName": "postedAt",
             "affinity": "INTEGER"
           },
           {
@@ -217,18 +217,18 @@
         },
         "indices": [
           {
-            "name": "index_Transaction_accountId",
+            "name": "index_transactions_accountId",
             "unique": false,
             "columnNames": [
               "accountId"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Transaction_accountId` ON `${TABLE_NAME}` (`accountId`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_transactions_accountId` ON `${TABLE_NAME}` (`accountId`)"
           }
         ],
         "foreignKeys": [
           {
-            "table": "Account",
+            "table": "accounts",
             "onDelete": "CASCADE",
             "onUpdate": "CASCADE",
             "columns": [
@@ -243,7 +243,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '963044f717e2783cf629973cd773924d')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '697150e6f41d8f432a6cb3be98999e03')"
     ]
   }
 }

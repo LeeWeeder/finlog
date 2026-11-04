@@ -5,12 +5,14 @@ import com.leeweeder.finlog.data.FinLogDatabase
 import com.leeweeder.finlog.data.dao.account.AccountDao
 import com.leeweeder.finlog.data.dao.account.CreditAccountDao
 import com.leeweeder.finlog.data.dao.account.DebitAccountDao
-import com.leeweeder.finlog.data.entity.account.Account
-import com.leeweeder.finlog.data.entity.account.CreditAccount
-import com.leeweeder.finlog.data.entity.account.DebitAccount
+import com.leeweeder.finlog.data.entity.account.AccountEntity
+import com.leeweeder.finlog.data.entity.account.CreditAccountEntity
+import com.leeweeder.finlog.data.entity.account.DebitAccountEntity
+import com.leeweeder.finlog.domain.model.account.Account
 import com.leeweeder.finlog.domain.model.account.AccountType
 import com.leeweeder.finlog.domain.model.account.FiatAccountType
 import com.leeweeder.finlog.domain.repository.AccountRepository
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 internal class AccountRepositoryImpl @Inject constructor(
@@ -29,7 +31,7 @@ internal class AccountRepositoryImpl @Inject constructor(
     ) {
         finLogDatabase.withWriteTransaction {
             val accountId = accountDao.insert(
-                Account(
+                AccountEntity(
                     type = AccountType.Fiat,
                     name = name,
                     isIncludedInNetBalance = isIncludedInNetBalance,
@@ -41,7 +43,7 @@ internal class AccountRepositoryImpl @Inject constructor(
             when (fiatAccountType) {
                 FiatAccountType.Debit -> {
                     debitAccountDao.insert(
-                        DebitAccount(
+                        DebitAccountEntity(
                             accountId = accountId,
                             currencyCode = currencyCode
                         )
@@ -50,7 +52,7 @@ internal class AccountRepositoryImpl @Inject constructor(
 
                 FiatAccountType.Credit -> {
                     creditAccountDao.insert(
-                        CreditAccount(
+                        CreditAccountEntity(
                             accountId = accountId,
                             currencyCode = currencyCode
                         )
@@ -68,5 +70,9 @@ internal class AccountRepositoryImpl @Inject constructor(
         iconKey: String
     ) {
         TODO("Not yet implemented")
+    }
+
+    override fun observeActiveAccounts(): Flow<List<Account>> {
+        return debitAccountDao.observeActive()
     }
 }

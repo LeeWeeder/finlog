@@ -5,7 +5,7 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 
 internal class FinLogNavigator(private val backStack: NavBackStack<NavKey>) {
-    fun toCreateAccount() = backStack.add(Screen.CreateAccount)
+    fun toManageAccount(id: Long?) = backStack.add(Screen.ManageAccount(id))
     fun back() = backStack.removeLastOrNull()
 }
 

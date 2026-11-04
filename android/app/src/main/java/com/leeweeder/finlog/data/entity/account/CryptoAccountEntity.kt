@@ -5,15 +5,16 @@ import androidx.room3.ForeignKey
 import androidx.room3.PrimaryKey
 
 @Entity(
+    tableName = "crypto_accounts",
     foreignKeys = [ForeignKey(
-        entity = Account::class,
+        entity = AccountEntity::class,
         parentColumns = ["id"],
         childColumns = ["accountId"],
         onDelete = ForeignKey.CASCADE,
         onUpdate = ForeignKey.CASCADE
     )]
 )
-internal data class CryptoAccount(
+internal data class CryptoAccountEntity(
     @PrimaryKey
     override val accountId: Long,
     val assetSymbol: String

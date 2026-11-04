@@ -4,8 +4,8 @@ import androidx.room3.Entity
 import androidx.room3.PrimaryKey
 import com.leeweeder.finlog.domain.model.account.AccountType
 
-@Entity
-internal data class Account(
+@Entity(tableName = "accounts")
+internal data class AccountEntity(
     val type: AccountType,
     val name: String,
     val isIncludedInNetBalance: Boolean,

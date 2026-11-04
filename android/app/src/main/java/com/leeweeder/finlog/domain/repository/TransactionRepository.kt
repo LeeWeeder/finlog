@@ -1,14 +1,10 @@
 package com.leeweeder.finlog.domain.repository
 
-import com.leeweeder.finlog.domain.model.Amount
-import com.leeweeder.finlog.domain.model.TransactionType
-import kotlin.time.Instant
+import com.leeweeder.finlog.domain.model.transaction.Transaction
+import kotlinx.coroutines.flow.Flow
 
 interface TransactionRepository {
-    suspend fun insertTransaction(
-        accountId: Long,
-        amount: Amount,
-        type: TransactionType,
-        postedAt: Instant? = null
-    )
+    suspend fun insertTransaction(transaction: Transaction)
+
+    fun observeTransactionsOfAccounts(accountIds: Set<Long>): Flow<List<Transaction>>
 }
