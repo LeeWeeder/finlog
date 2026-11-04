@@ -1,18 +1,16 @@
 package com.leeweeder.finlog.ui.home
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.layout.plus
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButtonMenu
@@ -40,11 +38,11 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.leeweeder.finlog.domain.model.Amount
 import com.leeweeder.finlog.ui.icons.add
+import com.leeweeder.finlog.ui.icons.addCard
 import com.leeweeder.finlog.ui.icons.close
 import com.leeweeder.finlog.ui.icons.paymentArrowDown
-import com.leeweeder.finlog.ui.icons.payments
+import com.leeweeder.finlog.ui.icons.paymentArrowUp
 import com.leeweeder.finlog.ui.icons.sendMoney
-import com.leeweeder.finlog.ui.icons.wallet
 import java.math.BigDecimal
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -113,6 +111,7 @@ private fun HomeScreen(
                                 FloatingButtonActions.Income -> TODO()
                                 FloatingButtonActions.Expense -> TODO()
                                 FloatingButtonActions.Transfer -> TODO()
+                                FloatingButtonActions.NewAccount -> TODO()
                             }
                         },
                         text = {
@@ -130,14 +129,18 @@ private fun HomeScreen(
         }
     ) { innerPadding ->
         LazyVerticalGrid(
-            columns = GridCells.Fixed(2)
+            columns = GridCells.Fixed(2),
+            contentPadding = innerPadding + PaddingValues(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(uiState.accountsWithBalance) { accountWithBalance ->
                 ElevatedCard(
                     onClick = {
                         // TODO: Implement click
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.extraLarge
                 ) {
                     Column(
                         modifier = Modifier.padding(24.dp)
@@ -150,30 +153,6 @@ private fun HomeScreen(
                 }
             }
         }
-        LazyColumn(
-            modifier = Modifier.padding(innerPadding)
-        ) {
-            item {
-                LazyRow() {
-                    items(uiState.accountsWithBalance) { accountWithBalance ->
-                        Card() {
-                            Text(accountWithBalance.account.name)
-                            Text(accountWithBalance.account.code)
-                            Text(accountWithBalance.balance.display)
-                        }
-                    }
-                    item {
-                        Button(
-                            onClick = {
-                                onNavigateToManageAccount(null)
-                            }
-                        ) {
-                            Text("Add account")
-                        }
-                    }
-                }
-            }
-        }
     }
 }
 
@@ -181,9 +160,10 @@ private enum class FloatingButtonActions(
     val icon: ImageVector,
     val label: String
 ) {
-    Income(wallet, "Record income"),
-    Expense(payments, "Record expense"),
-    Transfer(sendMoney, "Record transfer")
+    NewAccount(addCard, "New account"),
+    Transfer(sendMoney, "Record transfer"),
+    Income(paymentArrowDown, "Record income"),
+    Expense(paymentArrowUp, "Record expense")
 }
 
 @Composable
