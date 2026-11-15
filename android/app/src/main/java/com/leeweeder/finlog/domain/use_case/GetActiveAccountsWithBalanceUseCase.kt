@@ -19,7 +19,7 @@ internal class GetActiveAccountsWithBalanceUseCase @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     operator fun invoke(): Flow<List<AccountWithBalance>> {
         return accountRepository.observeActiveAccounts()
-            .map { accounts -> accounts.associateBy { it.accountId } }
+            .map { accounts -> accounts.associateBy { it.id } }
             .flatMapLatest { activeAccounts ->
                 transactionRepository
                     .observeTransactionsOfAccounts(activeAccounts.keys)
@@ -29,7 +29,7 @@ internal class GetActiveAccountsWithBalanceUseCase @Inject constructor(
                             AccountWithBalance(
                                 account = account,
                                 balance = balanceCalculator.calculateBalance(
-                                    byAccount[account.accountId].orEmpty(),
+                                    byAccount[account.id].orEmpty(),
                                     account.decimalPlaces
                                 )
                             )

@@ -3,13 +3,14 @@ package com.leeweeder.finlog.ui.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.leeweeder.finlog.ui.account.AccountOperation
 import com.leeweeder.finlog.ui.account.ManageAccountScreen
+import com.leeweeder.finlog.ui.account.ManageAccountViewModel
 import com.leeweeder.finlog.ui.home.HomeScreen
 
 @Composable
@@ -36,8 +37,18 @@ internal fun FinLogNavigation() {
                     )
                 }
 
-                entry<Screen.ManageAccount> {
-                    ManageAccountScreen(AccountOperation.Add)
+                entry<Screen.ManageAccount> { key ->
+                    val viewModel =
+                        hiltViewModel<ManageAccountViewModel, ManageAccountViewModel.Factory>(
+                            creationCallback = { factory -> factory.create(key.accountId) }
+                        )
+
+                    ManageAccountScreen(
+                        viewModel = viewModel,
+                        onNavigateBack = {
+                            navigator.back()
+                        }
+                    )
                 }
             }
         )

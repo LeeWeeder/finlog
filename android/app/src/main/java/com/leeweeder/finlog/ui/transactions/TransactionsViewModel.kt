@@ -60,7 +60,7 @@ internal class TransactionsViewModel @Inject constructor(
                         is TransactionDraft.Standalone -> {
                             transactionRepository.insertTransaction(
                                 Transaction(
-                                    accountId = draft.selectedAccount!!.accountId,
+                                    accountId = draft.selectedAccount!!.id,
                                     amount = draft.amount,
                                     transactionType = when (draft.type) {
                                         StandaloneTransactionType.Expense -> TransactionType.Expense

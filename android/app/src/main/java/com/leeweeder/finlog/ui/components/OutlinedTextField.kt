@@ -18,8 +18,10 @@ fun OutlinedTextField(
     placeholderText: String? = null,
     singleLine: Boolean = false,
     textAlign: TextAlign = TextAlign.Start,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    errorMessage: String? = null
 ) {
+    val isError = !errorMessage.isNullOrBlank()
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
@@ -35,6 +37,12 @@ fun OutlinedTextField(
         },
         singleLine = singleLine,
         keyboardOptions = keyboardOptions,
-        textStyle = TextStyle(textAlign = textAlign)
+        textStyle = TextStyle(textAlign = textAlign),
+        isError = isError,
+        supportingText = if (isError) {
+            {
+                Text(errorMessage)
+            }
+        } else null
     )
 }

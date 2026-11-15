@@ -41,6 +41,7 @@ import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -61,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.leeweeder.finlog.R
+import com.leeweeder.finlog.domain.exception.account.AccountException
 import com.leeweeder.finlog.domain.model.account.AccountType
 import com.leeweeder.finlog.domain.model.currency.Currency
 import com.leeweeder.finlog.ui.account.components.CurrencyPicker
@@ -76,13 +78,24 @@ import com.leeweeder.finlog.ui.icons.remove
 
 @Composable
 internal fun ManageAccountScreen(
-    accountOperation: AccountOperation,
+    onNavigateBack: () -> Unit,
     viewModel: ManageAccountViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val accountOperation =
+        if (viewModel.isNewAccount) AccountOperation.Add else AccountOperation.Edit
+
+    LaunchedEffect(Unit) {
+        viewModel.eventFlow.collect { uiEvent ->
+            when (uiEvent) {
+                ManageAccountUiEvent.PrimaryActionSuccess -> onNavigateBack()
+            }
+        }
+    }
 
     ManageAccountScreen(
         accountOperation = accountOperation,
+        onNavigateBack = onNavigateBack,
         uiState = uiState,
         onEvent = viewModel::onEvent
     )
@@ -92,6 +105,7 @@ internal fun ManageAccountScreen(
 @Composable
 private fun ManageAccountScreen(
     accountOperation: AccountOperation,
+    onNavigateBack: () -> Unit,
     uiState: CreateAccountUiState,
     onEvent: (ManageAccountEvent) -> Unit
 ) {
@@ -102,13 +116,11 @@ private fun ManageAccountScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text("${accountOperation.label} account")
+                    Text("${accountOperation.titleLabel} account")
                 },
                 navigationIcon = {
                     IconButton(
-                        onClick = {
-                            // TODO: Implement click
-                        }
+                        onClick = onNavigateBack
                     ) {
                         Icon(
                             imageVector = arrowBack,
@@ -124,10 +136,10 @@ private fun ManageAccountScreen(
             ) {
                 Button(
                     onClick = {
-                        onEvent(ManageAccountEvent.AddAccount)
+                        onEvent(ManageAccountEvent.PrimaryActionClick)
                     }
                 ) {
-                    Text(accountOperation.label)
+                    Text(accountOperation.buttonLabel)
                 }
             }
         },
@@ -197,7 +209,8 @@ private fun ManageAccountScreen(
                             modifier = Modifier.fillMaxWidth(),
                             placeholderText = "e.g. Cash",
                             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                            singleLine = true
+                            singleLine = true,
+                            errorMessage = if (loaded.hasNameTakenError) AccountException.NameTaken.MESSAGE else null
                         )
                     }
 
@@ -410,6 +423,7 @@ private fun MangeAccountScreenPreview() {
     FinLogBottomSheetProvider {
         ManageAccountScreen(
             accountOperation = AccountOperation.Add,
+            onNavigateBack = {},
             uiState = CreateAccountUiState.Loaded(
                 name = "",
                 AccountType.Asset,
@@ -422,16 +436,9 @@ private fun MangeAccountScreenPreview() {
 }
 
 
-internal sealed interface AccountOperation {
-    val label: String
-
-    data object Add : AccountOperation {
-        override val label = "Add"
-    }
-
-    data class Edit(val accountId: Long) : AccountOperation {
-        override val label = "Edit"
-    }
+internal enum class AccountOperation(val titleLabel: String, val buttonLabel: String) {
+    Add("Add", "Add"),
+    Edit("Edit", "Save")
 }
 
 private enum class AccountTypeDisplay(

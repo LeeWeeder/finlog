@@ -31,7 +31,7 @@ internal sealed interface HomeUiState {
         val netTotal: Amount
             get() {
                 if (accountsWithBalance.isEmpty()) return Amount(BigDecimal(0))
-                
+
                 return Amount(accountsWithBalance.filter { it.account.isIncludedInNetBalance }
                     .sumOf { it.balance.value }).scaleTo(accountsWithBalance.first().account.decimalPlaces)
             }

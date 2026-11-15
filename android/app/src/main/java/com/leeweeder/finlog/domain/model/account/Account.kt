@@ -7,7 +7,7 @@ import kotlin.time.Clock
 import kotlin.time.Instant
 
 data class Account(
-    val accountId: Long,
+    val id: Long,
     val type: AccountType,
     val name: String,
     val currencyCode: String,
@@ -21,7 +21,7 @@ data class Account(
         createdAt: Instant = Clock.System.now()
     ): Transaction {
         return Transaction(
-            accountId = accountId,
+            accountId = id,
             amount = amount.scaleTo(decimalPlaces),
             transactionType = transactionType,
             postedAt = postedAt,
