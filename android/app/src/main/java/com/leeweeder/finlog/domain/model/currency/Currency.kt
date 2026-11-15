@@ -2,13 +2,16 @@ package com.leeweeder.finlog.domain.model.currency
 
 @ConsistentCopyVisibility
 data class Currencies private constructor(
-    val fiatCurrencies: List<Currency.FiatCurrency>,
-    val cryptoCurrencies: List<Currency.CryptoCurrency>
+    private val fiatCurrencies: List<Currency.FiatCurrency>,
+    private val cryptoCurrencies: List<Currency.CryptoCurrency>
 ) {
     constructor(
         fiatCurrencies: Set<Currency.FiatCurrency>,
         cryptoCurrency: Set<Currency.CryptoCurrency>
     ) : this(fiatCurrencies.toList(), cryptoCurrency.toList())
+
+    val values: List<Currency>
+        get() = fiatCurrencies + cryptoCurrencies
 }
 
 sealed interface Currency {

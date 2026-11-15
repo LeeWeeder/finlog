@@ -2,7 +2,7 @@ package com.leeweeder.finlog.ui.account
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.leeweeder.finlog.domain.model.account.FiatAccountType
+import com.leeweeder.finlog.domain.model.account.AccountType
 import com.leeweeder.finlog.domain.model.currency.Currencies
 import com.leeweeder.finlog.domain.model.currency.Currency
 import com.leeweeder.finlog.domain.repository.AccountRepository
@@ -38,35 +38,19 @@ internal class ManageAccountViewModel @Inject constructor(
         if (currencies == null) {
             CreateAccountUiState.Loading
         } else {
-            when (draft.accountType) {
-                AccountType.Crypto -> {
-                    val currencies = currencies.cryptoCurrencies
-                    CreateAccountUiState.Loaded.Crypto(
-                        name = draft.name,
-                        accountType = draft.accountType,
-                        currency = draft.currency ?: currencies.firstOrNull()
-                        ?: return@combine CreateAccountUiState.Loading,
-                        currencies = currencies,
-                        decimalPlaces = draft.decimalPlaces
-                    )
-                }
+            val currencies = currencies.values
+            // TODO: Implement setup screen
+            // TODO: Default to device currency if exist on our own list, otherwise, USD
+            val defaultCurrency = currencies.firstOrNull()
 
-                is AccountType.Fiat -> {
-                    val currencies = currencies.fiatCurrencies
-                    val defaultCurrency = currencies.firstOrNull()
-
-                    val currency = draft.currency ?: defaultCurrency
-                    ?: return@combine CreateAccountUiState.Loading
-
-                    CreateAccountUiState.Loaded.Fiat(
-                        name = draft.name,
-                        accountType = draft.accountType,
-                        currency = currency,
-                        currencies = currencies,
-                        decimalPlaces = draft.decimalPlaces
-                    )
-                }
-            }
+            CreateAccountUiState.Loaded(
+                name = draft.name,
+                accountType = draft.accountType,
+                currency = draft.currency ?: defaultCurrency
+                ?: return@combine CreateAccountUiState.Loading,
+                currencies = currencies,
+                decimalPlaces = draft.decimalPlaces
+            )
         }
     }.stateIn(
         scope = viewModelScope,
@@ -115,23 +99,17 @@ internal class ManageAccountViewModel @Inject constructor(
     }
 
     private fun onAddAccount() {
-        val state = uiState.value as? CreateAccountUiState.Loaded<*> ?: return
+        val state = uiState.value as? CreateAccountUiState.Loaded ?: return
 
         viewModelScope.launch {
-            when (state.accountType) {
-                AccountType.Crypto -> TODO()
-                AccountType.Fiat.Credit -> TODO()
-                AccountType.Fiat.Debit -> {
-                    accountRepository.insertFiatAccount(
-                        currencyCode = state.currency.code,
-                        name = state.name,
-                        fiatAccountType = FiatAccountType.Debit,
-                        isIncludedInNetBalance = true, // TODO: Implement show/hide in balance,
-                        decimalPlaces = state.decimalPlaces,
-                        iconKey = "wallet" // TODO: Implement account icon customization
-                    )
-                }
-            }
+            accountRepository.insert(
+                currencyCode = state.currency.code,
+                name = state.name,
+                accountType = state.accountType,
+                isIncludedInNetBalance = true, // TODO: Implement show/hide in balance,
+                decimalPlaces = state.decimalPlaces,
+                iconKey = "wallet" // TODO: Implement account icon customization
+            )
         }
     }
 }
@@ -146,45 +124,19 @@ internal sealed interface ManageAccountEvent {
 
 internal data class CreateAccountDraft(
     val name: String = "",
-    val accountType: AccountType = AccountType.Fiat.Debit,
+    val accountType: AccountType = AccountType.Asset,
     val currency: Currency? = null,
     val decimalPlaces: Int = 2
 )
 
 internal sealed interface CreateAccountUiState {
-    sealed interface Loaded<T : Currency> : CreateAccountUiState {
-        val name: String
-        val accountType: AccountType
-        val currencies: List<T>
-        val currency: Currency
+    data class Loaded(
+        val name: String,
+        val accountType: AccountType,
+        val currencies: List<Currency>,
+        val currency: Currency,
         val decimalPlaces: Int
-
-        data class Fiat(
-            override val name: String,
-            override val accountType: AccountType,
-            override val currencies: List<Currency.FiatCurrency>,
-            override val currency: Currency,
-            override val decimalPlaces: Int
-        ) : Loaded<Currency.FiatCurrency>
-
-        data class Crypto(
-            override val name: String,
-            override val accountType: AccountType,
-            override val currencies: List<Currency.CryptoCurrency>,
-            override val currency: Currency,
-            override val decimalPlaces: Int
-        ) : Loaded<Currency.CryptoCurrency>
-    }
+    ) : CreateAccountUiState
 
     data object Loading : CreateAccountUiState
 }
-
-internal sealed interface AccountType {
-    sealed interface Fiat : AccountType {
-        data object Credit : Fiat
-        data object Debit : Fiat
-    }
-
-    data object Crypto : AccountType
-}
-

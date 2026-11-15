@@ -8,9 +8,11 @@ import kotlin.time.Instant
 
 data class Account(
     val accountId: Long,
+    val type: AccountType,
     val name: String,
-    val code: String,
-    val decimalPlaces: Int
+    val currencyCode: String,
+    val decimalPlaces: Int,
+    val isIncludedInNetBalance: Boolean
 ) {
     fun newTransaction(
         amount: Amount,

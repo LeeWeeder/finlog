@@ -61,18 +61,18 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.leeweeder.finlog.R
+import com.leeweeder.finlog.domain.model.account.AccountType
 import com.leeweeder.finlog.domain.model.currency.Currency
 import com.leeweeder.finlog.ui.account.components.CurrencyPicker
 import com.leeweeder.finlog.ui.components.OutlinedTextField
 import com.leeweeder.finlog.ui.components.bottom_sheet.FinLogBottomSheetProvider
 import com.leeweeder.finlog.ui.components.bottom_sheet.LocalBottomSheetController
+import com.leeweeder.finlog.ui.icons.add
 import com.leeweeder.finlog.ui.icons.arrowBack
 import com.leeweeder.finlog.ui.icons.chevronForward
-import com.leeweeder.finlog.ui.icons.creditCard
-import com.leeweeder.finlog.ui.icons.currencyBitcoin
 import com.leeweeder.finlog.ui.icons.decimalDecrease
 import com.leeweeder.finlog.ui.icons.decimalIncrease
-import com.leeweeder.finlog.ui.icons.wallet
+import com.leeweeder.finlog.ui.icons.remove
 
 @Composable
 internal fun ManageAccountScreen(
@@ -148,7 +148,7 @@ private fun ManageAccountScreen(
             if (uiState is CreateAccountUiState.Loading) {
                 LoadingIndicator(modifier = Modifier.align(Alignment.Center))
             } else {
-                val loaded = uiState as CreateAccountUiState.Loaded<*>
+                val loaded = uiState as CreateAccountUiState.Loaded
 
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -410,9 +410,9 @@ private fun MangeAccountScreenPreview() {
     FinLogBottomSheetProvider {
         ManageAccountScreen(
             accountOperation = AccountOperation.Add,
-            uiState = CreateAccountUiState.Loaded.Fiat(
+            uiState = CreateAccountUiState.Loaded(
                 name = "",
-                AccountType.Fiat.Debit,
+                AccountType.Asset,
                 currencies = listOf(),
                 currency = Currency.FiatCurrency("PHP", "Peso", 2),
                 decimalPlaces = 18
@@ -439,7 +439,6 @@ private enum class AccountTypeDisplay(
     val icon: ImageVector,
     val accountType: AccountType
 ) {
-    Debit(label = "Debit", icon = wallet, accountType = AccountType.Fiat.Debit),
-    Credit(label = "Credit", icon = creditCard, accountType = AccountType.Fiat.Credit),
-    Crypto(label = "Crypto", icon = currencyBitcoin, accountType = AccountType.Crypto),
+    Asset(label = "Asset", icon = add, accountType = AccountType.Asset),
+    Liability(label = "Liability", icon = remove, accountType = AccountType.Liability)
 }

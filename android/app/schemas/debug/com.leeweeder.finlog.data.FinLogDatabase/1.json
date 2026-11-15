@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "697150e6f41d8f432a6cb3be98999e03",
+    "identityHash": "571ce954e557efbbd583d48ed59745ef",
     "entities": [
       {
         "tableName": "accounts",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`type` TEXT NOT NULL, `name` TEXT NOT NULL, `isIncludedInNetBalance` INTEGER NOT NULL, `isArchived` INTEGER NOT NULL, `iconKey` TEXT NOT NULL, `decimalPlaces` INTEGER NOT NULL, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`type` TEXT NOT NULL, `name` TEXT NOT NULL, `currencyCode` TEXT NOT NULL, `isIncludedInNetBalance` INTEGER NOT NULL, `isArchived` INTEGER NOT NULL, `iconKey` TEXT NOT NULL, `decimalPlaces` INTEGER NOT NULL, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL)",
         "fields": [
           {
             "fieldPath": "type",
@@ -17,6 +17,12 @@
           {
             "fieldPath": "name",
             "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currencyCode",
+            "columnName": "currencyCode",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -57,117 +63,6 @@
             "id"
           ]
         }
-      },
-      {
-        "tableName": "debit_accounts",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`accountId` INTEGER NOT NULL, `currencyCode` TEXT NOT NULL, PRIMARY KEY(`accountId`), FOREIGN KEY(`accountId`) REFERENCES `accounts`(`id`) ON UPDATE CASCADE ON DELETE CASCADE )",
-        "fields": [
-          {
-            "fieldPath": "accountId",
-            "columnName": "accountId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "currencyCode",
-            "columnName": "currencyCode",
-            "affinity": "TEXT",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "accountId"
-          ]
-        },
-        "foreignKeys": [
-          {
-            "table": "accounts",
-            "onDelete": "CASCADE",
-            "onUpdate": "CASCADE",
-            "columns": [
-              "accountId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
-          }
-        ]
-      },
-      {
-        "tableName": "credit_accounts",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`accountId` INTEGER NOT NULL, `currencyCode` TEXT NOT NULL, PRIMARY KEY(`accountId`), FOREIGN KEY(`accountId`) REFERENCES `accounts`(`id`) ON UPDATE CASCADE ON DELETE CASCADE )",
-        "fields": [
-          {
-            "fieldPath": "accountId",
-            "columnName": "accountId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "currencyCode",
-            "columnName": "currencyCode",
-            "affinity": "TEXT",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "accountId"
-          ]
-        },
-        "foreignKeys": [
-          {
-            "table": "accounts",
-            "onDelete": "CASCADE",
-            "onUpdate": "CASCADE",
-            "columns": [
-              "accountId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
-          }
-        ]
-      },
-      {
-        "tableName": "crypto_accounts",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`accountId` INTEGER NOT NULL, `assetSymbol` TEXT NOT NULL, PRIMARY KEY(`accountId`), FOREIGN KEY(`accountId`) REFERENCES `accounts`(`id`) ON UPDATE CASCADE ON DELETE CASCADE )",
-        "fields": [
-          {
-            "fieldPath": "accountId",
-            "columnName": "accountId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "assetSymbol",
-            "columnName": "assetSymbol",
-            "affinity": "TEXT",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "accountId"
-          ]
-        },
-        "foreignKeys": [
-          {
-            "table": "accounts",
-            "onDelete": "CASCADE",
-            "onUpdate": "CASCADE",
-            "columns": [
-              "accountId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
-          }
-        ]
       },
       {
         "tableName": "transactions",
@@ -243,7 +138,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '697150e6f41d8f432a6cb3be98999e03')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '571ce954e557efbbd583d48ed59745ef')"
     ]
   }
 }

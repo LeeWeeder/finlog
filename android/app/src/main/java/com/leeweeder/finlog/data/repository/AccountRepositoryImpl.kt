@@ -1,78 +1,37 @@
 package com.leeweeder.finlog.data.repository
 
-import androidx.room3.withWriteTransaction
-import com.leeweeder.finlog.data.FinLogDatabase
-import com.leeweeder.finlog.data.dao.account.AccountDao
-import com.leeweeder.finlog.data.dao.account.CreditAccountDao
-import com.leeweeder.finlog.data.dao.account.DebitAccountDao
-import com.leeweeder.finlog.data.entity.account.AccountEntity
-import com.leeweeder.finlog.data.entity.account.CreditAccountEntity
-import com.leeweeder.finlog.data.entity.account.DebitAccountEntity
+import com.leeweeder.finlog.data.dao.AccountDao
+import com.leeweeder.finlog.data.entity.AccountEntity
 import com.leeweeder.finlog.domain.model.account.Account
 import com.leeweeder.finlog.domain.model.account.AccountType
-import com.leeweeder.finlog.domain.model.account.FiatAccountType
 import com.leeweeder.finlog.domain.repository.AccountRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 internal class AccountRepositoryImpl @Inject constructor(
-    private val finLogDatabase: FinLogDatabase,
-    private val accountDao: AccountDao,
-    private val debitAccountDao: DebitAccountDao,
-    private val creditAccountDao: CreditAccountDao
+    private val accountDao: AccountDao
 ) : AccountRepository {
-    override suspend fun insertFiatAccount(
+    override suspend fun insert(
         currencyCode: String,
         name: String,
-        fiatAccountType: FiatAccountType,
+        accountType: AccountType,
         isIncludedInNetBalance: Boolean,
         decimalPlaces: Int,
         iconKey: String
     ) {
-        finLogDatabase.withWriteTransaction {
-            val accountId = accountDao.insert(
-                AccountEntity(
-                    type = AccountType.Fiat,
-                    name = name,
-                    isIncludedInNetBalance = isIncludedInNetBalance,
-                    iconKey = iconKey,
-                    decimalPlaces = decimalPlaces
-                )
+        accountDao.insert(
+            AccountEntity(
+                type = accountType,
+                currencyCode = currencyCode,
+                name = name,
+                isIncludedInNetBalance = isIncludedInNetBalance,
+                iconKey = iconKey,
+                decimalPlaces = decimalPlaces
             )
-
-            when (fiatAccountType) {
-                FiatAccountType.Debit -> {
-                    debitAccountDao.insert(
-                        DebitAccountEntity(
-                            accountId = accountId,
-                            currencyCode = currencyCode
-                        )
-                    )
-                }
-
-                FiatAccountType.Credit -> {
-                    creditAccountDao.insert(
-                        CreditAccountEntity(
-                            accountId = accountId,
-                            currencyCode = currencyCode
-                        )
-                    )
-                }
-            }
-        }
-    }
-
-    override suspend fun insertCryptoAccount(
-        assetSymbol: String,
-        name: String,
-        isIncludedInNetBalance: Boolean,
-        decimalPlaces: Int,
-        iconKey: String
-    ) {
-        TODO("Not yet implemented")
+        )
     }
 
     override fun observeActiveAccounts(): Flow<List<Account>> {
-        return debitAccountDao.observeActive()
+        return accountDao.observeActive()
     }
 }

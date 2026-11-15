@@ -1,22 +1,14 @@
 package com.leeweeder.finlog.domain.repository
 
 import com.leeweeder.finlog.domain.model.account.Account
-import com.leeweeder.finlog.domain.model.account.FiatAccountType
+import com.leeweeder.finlog.domain.model.account.AccountType
 import kotlinx.coroutines.flow.Flow
 
 internal interface AccountRepository {
-    suspend fun insertFiatAccount(
+    suspend fun insert(
         currencyCode: String,
         name: String,
-        fiatAccountType: FiatAccountType,
-        isIncludedInNetBalance: Boolean,
-        decimalPlaces: Int,
-        iconKey: String
-    )
-
-    suspend fun insertCryptoAccount(
-        assetSymbol: String,
-        name: String,
+        accountType: AccountType,
         isIncludedInNetBalance: Boolean,
         decimalPlaces: Int,
         iconKey: String
