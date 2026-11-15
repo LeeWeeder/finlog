@@ -12,6 +12,8 @@ internal interface AccountRepository {
         fields: AccountEditFields
     )
 
+    suspend fun delete(accountId: Long)
+
     suspend fun getById(accountId: Long): Account?
 
     fun observeActiveAccounts(): Flow<List<Account>>

@@ -51,6 +51,10 @@ internal class AccountRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun delete(accountId: Long) {
+        accountDao.delete(accountId)
+    }
+
     override suspend fun getById(accountId: Long): Account? {
         return accountDao.getById(accountId)?.toDomain()
     }

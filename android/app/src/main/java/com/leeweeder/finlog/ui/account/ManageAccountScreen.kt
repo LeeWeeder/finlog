@@ -19,8 +19,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.TextAutoSize
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -36,6 +38,7 @@ import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.material3.TopAppBar
@@ -44,6 +47,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -88,7 +92,7 @@ internal fun ManageAccountScreen(
     LaunchedEffect(Unit) {
         viewModel.eventFlow.collect { uiEvent ->
             when (uiEvent) {
-                ManageAccountUiEvent.PrimaryActionSuccess -> onNavigateBack()
+                ManageAccountUiEvent.PrimaryActionSuccess, ManageAccountUiEvent.DeleteActionSuccess -> onNavigateBack()
             }
         }
     }
@@ -112,6 +116,10 @@ private fun ManageAccountScreen(
     val sheetState = LocalBottomSheetController.current
     val focusManager = LocalFocusManager.current
 
+    var isDeleteConfirmationDialogVisible by remember {
+        mutableStateOf(false)
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -132,8 +140,16 @@ private fun ManageAccountScreen(
         },
         bottomBar = {
             FlexibleBottomAppBar(
-                horizontalArrangement = Arrangement.End
+                horizontalArrangement = Arrangement.spacedBy(8.dp, alignment = Alignment.End)
             ) {
+                if (accountOperation == AccountOperation.Edit) {
+                    TextButton(
+                        onClick = {
+                            isDeleteConfirmationDialogVisible = true
+                        },
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                    ) { Text("Delete") }
+                }
                 Button(
                     onClick = {
                         onEvent(ManageAccountEvent.PrimaryActionClick)
@@ -161,6 +177,40 @@ private fun ManageAccountScreen(
                 LoadingIndicator(modifier = Modifier.align(Alignment.Center))
             } else {
                 val loaded = uiState as CreateAccountUiState.Loaded
+
+                if (isDeleteConfirmationDialogVisible) {
+                    AlertDialog(
+                        onDismissRequest = {
+                            isDeleteConfirmationDialogVisible = false
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    isDeleteConfirmationDialogVisible = false
+                                    onEvent(ManageAccountEvent.Delete)
+                                },
+                                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                            ) {
+                                Text("Delete account")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = {
+                                    isDeleteConfirmationDialogVisible = false
+                                }
+                            ) {
+                                Text("Cancel")
+                            }
+                        },
+                        title = {
+                            Text("Delete ${loaded.name} account?")
+                        },
+                        text = {
+                            Text("All transactions associated with this account will also be deleted.")
+                        }
+                    )
+                }
 
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp)

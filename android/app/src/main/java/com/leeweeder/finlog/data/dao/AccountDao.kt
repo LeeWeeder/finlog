@@ -35,6 +35,9 @@ internal interface AccountDao {
         iconKey: String
     ): Int
 
+    @Query("DELETE FROM accounts WHERE id = :accountId")
+    suspend fun delete(accountId: Long)
+
     @Query("SELECT * FROM accounts WHERE id = :accountId")
     suspend fun getById(accountId: Long): AccountEntity?
 

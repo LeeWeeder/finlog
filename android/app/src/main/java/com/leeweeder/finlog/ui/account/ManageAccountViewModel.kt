@@ -103,6 +103,7 @@ internal class ManageAccountViewModel @AssistedInject constructor(
             is ManageAccountEvent.ChangeCurrency -> onChangeCurrency(event.currency)
             is ManageAccountEvent.SetDecimalPrecision -> onSetDecimalPrecision(event.digits)
             ManageAccountEvent.PrimaryActionClick -> onPrimaryAction()
+            ManageAccountEvent.Delete -> onDeleteAction()
         }
     }
 
@@ -166,6 +167,15 @@ internal class ManageAccountViewModel @AssistedInject constructor(
             }
         }
     }
+
+    private fun onDeleteAction() {
+        if (isNewAccount) return
+
+        viewModelScope.launch {
+            accountRepository.delete(accountId!!)
+            _eventChannel.send(ManageAccountUiEvent.DeleteActionSuccess)
+        }
+    }
 }
 
 internal sealed interface ManageAccountEvent {
@@ -174,10 +184,12 @@ internal sealed interface ManageAccountEvent {
     data class SetName(val newName: String) : ManageAccountEvent
     data class SetDecimalPrecision(val digits: Int) : ManageAccountEvent
     data object PrimaryActionClick : ManageAccountEvent
+    data object Delete : ManageAccountEvent
 }
 
 internal sealed interface ManageAccountUiEvent {
     data object PrimaryActionSuccess : ManageAccountUiEvent
+    data object DeleteActionSuccess : ManageAccountUiEvent
 }
 
 internal data class CreateAccountDraft(
