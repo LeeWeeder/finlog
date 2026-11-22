@@ -9,8 +9,8 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.leeweeder.finlog.ui.account.ManageAccountScreen
-import com.leeweeder.finlog.ui.account.ManageAccountViewModel
+import com.leeweeder.finlog.ui.account.AccountFormScreen
+import com.leeweeder.finlog.ui.account.AccountFormViewModel
 import com.leeweeder.finlog.ui.home.HomeScreen
 
 @Composable
@@ -39,11 +39,11 @@ internal fun FinLogNavigation() {
 
                 entry<Screen.ManageAccount> { key ->
                     val viewModel =
-                        hiltViewModel<ManageAccountViewModel, ManageAccountViewModel.Factory>(
+                        hiltViewModel<AccountFormViewModel, AccountFormViewModel.Factory>(
                             creationCallback = { factory -> factory.create(key.accountId) }
                         )
 
-                    ManageAccountScreen(
+                    AccountFormScreen(
                         viewModel = viewModel,
                         onNavigateBack = {
                             navigator.back()

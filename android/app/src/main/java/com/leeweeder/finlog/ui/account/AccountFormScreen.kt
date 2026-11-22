@@ -81,9 +81,9 @@ import com.leeweeder.finlog.ui.icons.decimalIncrease
 import com.leeweeder.finlog.ui.icons.remove
 
 @Composable
-internal fun ManageAccountScreen(
+internal fun AccountFormScreen(
     onNavigateBack: () -> Unit,
-    viewModel: ManageAccountViewModel = hiltViewModel()
+    viewModel: AccountFormViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val accountOperation =
@@ -92,12 +92,12 @@ internal fun ManageAccountScreen(
     LaunchedEffect(Unit) {
         viewModel.eventFlow.collect { uiEvent ->
             when (uiEvent) {
-                ManageAccountUiEvent.PrimaryActionSuccess, ManageAccountUiEvent.DeleteActionSuccess -> onNavigateBack()
+                AccountFormUiEvent.PrimaryActionSuccess, AccountFormUiEvent.DeleteActionSuccess -> onNavigateBack()
             }
         }
     }
 
-    ManageAccountScreen(
+    AccountFormScreen(
         accountOperation = accountOperation,
         onNavigateBack = onNavigateBack,
         uiState = uiState,
@@ -107,11 +107,11 @@ internal fun ManageAccountScreen(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun ManageAccountScreen(
+private fun AccountFormScreen(
     accountOperation: AccountOperation,
     onNavigateBack: () -> Unit,
-    uiState: CreateAccountUiState,
-    onEvent: (ManageAccountEvent) -> Unit
+    uiState: AccountFormUiState,
+    onEvent: (AccountFormEvent) -> Unit
 ) {
     val sheetState = LocalBottomSheetController.current
     val focusManager = LocalFocusManager.current
@@ -149,7 +149,7 @@ private fun ManageAccountScreen(
                 }
                 Button(
                     onClick = {
-                        onEvent(ManageAccountEvent.PrimaryActionClick)
+                        onEvent(AccountFormEvent.PrimaryActionClick)
                     }
                 ) {
                     Text(accountOperation.buttonLabel)
@@ -170,10 +170,10 @@ private fun ManageAccountScreen(
                 .padding(horizontal = 24.dp)
                 .fillMaxSize()
         ) {
-            if (uiState is CreateAccountUiState.Loading) {
+            if (uiState is AccountFormUiState.Loading) {
                 LoadingIndicator(modifier = Modifier.align(Alignment.Center))
             } else {
-                val loaded = uiState as CreateAccountUiState.Loaded
+                val loaded = uiState as AccountFormUiState.Loaded
 
                 if (isDeleteConfirmationDialogVisible) {
                     AlertDialog(
@@ -184,7 +184,7 @@ private fun ManageAccountScreen(
                             TextButton(
                                 onClick = {
                                     isDeleteConfirmationDialogVisible = false
-                                    onEvent(ManageAccountEvent.Delete)
+                                    onEvent(AccountFormEvent.Delete)
                                 },
                                 colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                             ) {
@@ -223,7 +223,7 @@ private fun ManageAccountScreen(
                                     checked = item.accountType == loaded.accountType,
                                     onCheckedChange = {
                                         onEvent(
-                                            ManageAccountEvent.ChangeAccountType(item.accountType)
+                                            AccountFormEvent.ChangeAccountFormType(item.accountType)
                                         )
                                     },
                                     shapes =
@@ -251,7 +251,7 @@ private fun ManageAccountScreen(
                     item {
                         OutlinedTextField(
                             value = loaded.name,
-                            onValueChange = { onEvent(ManageAccountEvent.SetName(it)) },
+                            onValueChange = { onEvent(AccountFormEvent.SetName(it)) },
                             label = "Account name",
                             modifier = Modifier.fillMaxWidth(),
                             placeholderText = "e.g. Cash",
@@ -278,7 +278,7 @@ private fun ManageAccountScreen(
                                             value = currency,
                                             currencies = loaded.currencies,
                                             onValueChange = {
-                                                onEvent(ManageAccountEvent.ChangeCurrency(it))
+                                                onEvent(AccountFormEvent.ChangeCurrency(it))
                                                 sheetState.hide()
                                             }
                                         )
@@ -336,7 +336,7 @@ private fun ManageAccountScreen(
                                                 modifier = Modifier.padding(16.dp)
                                             ) {
                                                 onEvent(
-                                                    ManageAccountEvent.SetDecimalPrecision(
+                                                    AccountFormEvent.SetDecimalPrecision(
                                                         it
                                                     )
                                                 )
@@ -468,10 +468,10 @@ private fun DecimalPrecisionInputPreview() {
 @Composable
 private fun MangeAccountScreenPreview() {
     FinLogBottomSheetProvider {
-        ManageAccountScreen(
+        AccountFormScreen(
             accountOperation = AccountOperation.Add,
             onNavigateBack = {},
-            uiState = CreateAccountUiState.Loaded(
+            uiState = AccountFormUiState.Loaded(
                 name = "",
                 AccountType.Asset,
                 currencies = listOf(),

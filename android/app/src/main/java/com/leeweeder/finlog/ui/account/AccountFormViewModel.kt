@@ -23,8 +23,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-@HiltViewModel(assistedFactory = ManageAccountViewModel.Factory::class)
-internal class ManageAccountViewModel @AssistedInject constructor(
+@HiltViewModel(assistedFactory = AccountFormViewModel.Factory::class)
+internal class AccountFormViewModel @AssistedInject constructor(
     @Assisted private val accountId: Long?,
     currenciesRepository: CurrenciesRepository,
     private val accountRepository: AccountRepository
@@ -34,7 +34,7 @@ internal class ManageAccountViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(accountId: Long?): ManageAccountViewModel
+        fun create(accountId: Long?): AccountFormViewModel
     }
 
     private val currencies: StateFlow<Currencies?> = currenciesRepository.getCurrencies().stateIn(
@@ -43,14 +43,14 @@ internal class ManageAccountViewModel @AssistedInject constructor(
         initialValue = null
     )
 
-    private val _createAccountDraft = MutableStateFlow(CreateAccountDraft())
+    private val _AccountFormDraft = MutableStateFlow(AccountFormDraft())
 
     init {
         viewModelScope.launch {
             if (accountId != null) {
                 val account = accountRepository.getById(accountId) ?: return@launch
 
-                _createAccountDraft.update {
+                _AccountFormDraft.update {
                     it.copy(
                         name = account.name,
                         accountType = account.type,
@@ -62,15 +62,15 @@ internal class ManageAccountViewModel @AssistedInject constructor(
         }
     }
 
-    private val _eventChannel = Channel<ManageAccountUiEvent>()
+    private val _eventChannel = Channel<AccountFormUiEvent>()
     val eventFlow = _eventChannel.receiveAsFlow()
 
     val uiState = combine(
-        _createAccountDraft,
+        _AccountFormDraft,
         currencies
     ) { draft, currencies ->
         if (currencies == null) {
-            CreateAccountUiState.Loading
+            AccountFormUiState.Loading
         } else {
             val currencies = currencies.values.associateBy { it.code }.toSortedMap()
             // TODO: Implement setup screen
@@ -81,10 +81,10 @@ internal class ManageAccountViewModel @AssistedInject constructor(
                 currencies[draftCurrencyCode]
             } ?: defaultCurrency
 
-            CreateAccountUiState.Loaded(
+            AccountFormUiState.Loaded(
                 name = draft.name,
                 accountType = draft.accountType,
-                currency = currency ?: return@combine CreateAccountUiState.Loading,
+                currency = currency ?: return@combine AccountFormUiState.Loading,
                 currencies = currencies.values.toList(),
                 decimalPlaces = draft.decimalPlaces,
                 hasNameTakenError = draft.hasNameTakenError
@@ -93,22 +93,22 @@ internal class ManageAccountViewModel @AssistedInject constructor(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = CreateAccountUiState.Loading
+        initialValue = AccountFormUiState.Loading
     )
 
-    fun onEvent(event: ManageAccountEvent) {
+    fun onEvent(event: AccountFormEvent) {
         when (event) {
-            is ManageAccountEvent.ChangeAccountType -> onChangeAccountType(event.accountType)
-            is ManageAccountEvent.SetName -> onSetName(event.newName)
-            is ManageAccountEvent.ChangeCurrency -> onChangeCurrency(event.currency)
-            is ManageAccountEvent.SetDecimalPrecision -> onSetDecimalPrecision(event.digits)
-            ManageAccountEvent.PrimaryActionClick -> onPrimaryAction()
-            ManageAccountEvent.Delete -> onDeleteAction()
+            is AccountFormEvent.ChangeAccountFormType -> onChangeAccountType(event.accountType)
+            is AccountFormEvent.SetName -> onSetName(event.newName)
+            is AccountFormEvent.ChangeCurrency -> onChangeCurrency(event.currency)
+            is AccountFormEvent.SetDecimalPrecision -> onSetDecimalPrecision(event.digits)
+            AccountFormEvent.PrimaryActionClick -> onPrimaryAction()
+            AccountFormEvent.Delete -> onDeleteAction()
         }
     }
 
     private fun onChangeCurrency(currency: Currency) {
-        _createAccountDraft.update {
+        _AccountFormDraft.update {
             it.copy(
                 currencyCode = currency.code,
                 decimalPlaces = if (currency is Currency.FiatCurrency) currency.digits else it.decimalPlaces
@@ -117,13 +117,13 @@ internal class ManageAccountViewModel @AssistedInject constructor(
     }
 
     private fun onSetName(newName: String) {
-        _createAccountDraft.update {
+        _AccountFormDraft.update {
             it.copy(name = newName, hasNameTakenError = false)
         }
     }
 
     private fun onChangeAccountType(accountType: AccountType) {
-        _createAccountDraft.update {
+        _AccountFormDraft.update {
             it.copy(
                 accountType = accountType
             )
@@ -131,13 +131,13 @@ internal class ManageAccountViewModel @AssistedInject constructor(
     }
 
     private fun onSetDecimalPrecision(digits: Int) {
-        _createAccountDraft.update {
+        _AccountFormDraft.update {
             it.copy(decimalPlaces = digits)
         }
     }
 
     private fun onPrimaryAction() {
-        val state = uiState.value as? CreateAccountUiState.Loaded ?: return
+        val state = uiState.value as? AccountFormUiState.Loaded ?: return
 
         val fields = AccountEditFields(
             name = state.name,
@@ -159,9 +159,9 @@ internal class ManageAccountViewModel @AssistedInject constructor(
                     )
                 }
 
-                _eventChannel.send(ManageAccountUiEvent.PrimaryActionSuccess)
+                _eventChannel.send(AccountFormUiEvent.PrimaryActionSuccess)
             } catch (_: AccountException.NameTaken) {
-                _createAccountDraft.update {
+                _AccountFormDraft.update {
                     it.copy(hasNameTakenError = true)
                 }
             }
@@ -173,26 +173,26 @@ internal class ManageAccountViewModel @AssistedInject constructor(
 
         viewModelScope.launch {
             accountRepository.delete(accountId!!)
-            _eventChannel.send(ManageAccountUiEvent.DeleteActionSuccess)
+            _eventChannel.send(AccountFormUiEvent.DeleteActionSuccess)
         }
     }
 }
 
-internal sealed interface ManageAccountEvent {
-    data class ChangeAccountType(val accountType: AccountType) : ManageAccountEvent
-    data class ChangeCurrency(val currency: Currency) : ManageAccountEvent
-    data class SetName(val newName: String) : ManageAccountEvent
-    data class SetDecimalPrecision(val digits: Int) : ManageAccountEvent
-    data object PrimaryActionClick : ManageAccountEvent
-    data object Delete : ManageAccountEvent
+internal sealed interface AccountFormEvent {
+    data class ChangeAccountFormType(val accountType: AccountType) : AccountFormEvent
+    data class ChangeCurrency(val currency: Currency) : AccountFormEvent
+    data class SetName(val newName: String) : AccountFormEvent
+    data class SetDecimalPrecision(val digits: Int) : AccountFormEvent
+    data object PrimaryActionClick : AccountFormEvent
+    data object Delete : AccountFormEvent
 }
 
-internal sealed interface ManageAccountUiEvent {
-    data object PrimaryActionSuccess : ManageAccountUiEvent
-    data object DeleteActionSuccess : ManageAccountUiEvent
+internal sealed interface AccountFormUiEvent {
+    data object PrimaryActionSuccess : AccountFormUiEvent
+    data object DeleteActionSuccess : AccountFormUiEvent
 }
 
-internal data class CreateAccountDraft(
+internal data class AccountFormDraft(
     val name: String = "",
     val accountType: AccountType = AccountType.Asset,
     val currencyCode: String? = null,
@@ -200,7 +200,7 @@ internal data class CreateAccountDraft(
     val hasNameTakenError: Boolean = false
 )
 
-internal sealed interface CreateAccountUiState {
+internal sealed interface AccountFormUiState {
     data class Loaded(
         val name: String,
         val accountType: AccountType,
@@ -208,7 +208,7 @@ internal sealed interface CreateAccountUiState {
         val currency: Currency,
         val decimalPlaces: Int,
         val hasNameTakenError: Boolean = false
-    ) : CreateAccountUiState
+    ) : AccountFormUiState
 
-    data object Loading : CreateAccountUiState
+    data object Loading : AccountFormUiState
 }

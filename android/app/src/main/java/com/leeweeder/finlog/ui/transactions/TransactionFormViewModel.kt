@@ -21,43 +21,43 @@ import kotlin.time.Clock
 import kotlin.time.Instant
 
 @HiltViewModel
-internal class ManageTransactionViewModel @Inject constructor(
+internal class TransactionFormViewModel @Inject constructor(
     accountRepository: AccountRepository,
     private val transactionRepository: TransactionRepository
 ) : ViewModel() {
-    private val transactionDraft: MutableStateFlow<TransactionDraft> =
-        MutableStateFlow(TransactionDraft.Standalone())
+    private val transactionDraft: MutableStateFlow<TransactionFormDraft> =
+        MutableStateFlow(TransactionFormDraft.Standalone())
 
     val uiState = combine(
         accountRepository.observeActiveAccounts(),
         transactionDraft
     ) { activeAccounts, draft ->
-        ManageTransactionUiState.Success(
+        TransactionFormUiState.Success(
             draft = when (draft) {
-                is TransactionDraft.Standalone -> draft.copy(
+                is TransactionFormDraft.Standalone -> draft.copy(
                     selectedAccount = activeAccounts.first()
                 )
 
-                is TransactionDraft.Transfer -> draft.copy(
+                is TransactionFormDraft.Transfer -> draft.copy(
                     fromAccount = activeAccounts.first()
                 )
             },
             availableAccounts = activeAccounts,
         )
     }.catch { throwable ->
-        ManageTransactionUiState.Error(throwable)
+        TransactionFormUiState.Error(throwable)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = ManageTransactionUiState.Loading
+        initialValue = TransactionFormUiState.Loading
     )
 
-    fun onEvent(event: TransactionEvent) {
+    fun onEvent(event: TransactionFormEvent) {
         when (event) {
-            TransactionEvent.Save -> {
+            TransactionFormEvent.Save -> {
                 viewModelScope.launch {
                     when (val draft = transactionDraft.value) {
-                        is TransactionDraft.Standalone -> {
+                        is TransactionFormDraft.Standalone -> {
                             transactionRepository.insertTransaction(
                                 Transaction(
                                     accountId = draft.selectedAccount!!.id,
@@ -72,92 +72,92 @@ internal class ManageTransactionViewModel @Inject constructor(
                             )
                         }
 
-                        is TransactionDraft.Transfer -> TODO()
+                        is TransactionFormDraft.Transfer -> TODO()
                     }
                 }
             }
 
-            is TransactionEvent.SetCreatedAt -> {
+            is TransactionFormEvent.SetCreatedAt -> {
                 transactionDraft.update {
                     it.withCreatedAt(event.createdAt)
                 }
             }
 
-            is TransactionEvent.SetPostedAt -> {
+            is TransactionFormEvent.SetPostedAt -> {
                 transactionDraft.update {
                     it.withPostedAt(event.postedAt)
                 }
             }
 
-            is TransactionEvent.SetTitle -> {
+            is TransactionFormEvent.SetTitle -> {
                 transactionDraft.update {
                     it.withTitle(event.title)
                 }
             }
 
-            is TransactionEvent.StandaloneTransactionEvent.SetAccount -> {
+            is TransactionFormEvent.Standalone.SetAccount -> {
                 transactionDraft.update {
-                    (it as TransactionDraft.Standalone).copy(
+                    (it as TransactionFormDraft.Standalone).copy(
                         selectedAccount = event.account
                     )
                 }
             }
 
-            is TransactionEvent.StandaloneTransactionEvent.SetAmount -> {
+            is TransactionFormEvent.Standalone.SetAmount -> {
                 transactionDraft.update {
-                    (it as TransactionDraft.Standalone).copy(
+                    (it as TransactionFormDraft.Standalone).copy(
                         amount = event.amount
                     )
                 }
             }
 
-            is TransactionEvent.StandaloneTransactionEvent.SetType -> {
+            is TransactionFormEvent.Standalone.SetType -> {
                 transactionDraft.update {
-                    (it as TransactionDraft.Standalone).copy(
+                    (it as TransactionFormDraft.Standalone).copy(
                         type = event.type
                     )
                 }
             }
 
-            TransactionEvent.ToggleIsPosted -> {
+            TransactionFormEvent.ToggleIsPosted -> {
                 transactionDraft.update {
                     it.withIsPosted(!it.isPosted)
                 }
             }
 
-            is TransactionEvent.TransferTransactionEvent.SetAccount -> {
+            is TransactionFormEvent.Transfer.SetAccount -> {
                 transactionDraft.update {
-                    val draft = it as TransactionDraft.Transfer
+                    val draft = it as TransactionFormDraft.Transfer
 
                     when (event.role) {
-                        TransactionEvent.TransferTransactionEvent.Role.Source -> draft.copy(
+                        TransactionFormEvent.Transfer.Role.Source -> draft.copy(
                             fromAccount = event.account
                         )
 
-                        TransactionEvent.TransferTransactionEvent.Role.Destination -> draft.copy(
+                        TransactionFormEvent.Transfer.Role.Destination -> draft.copy(
                             toAccount = event.account
                         )
                     }
                 }
             }
 
-            is TransactionEvent.TransferTransactionEvent.SetAmount -> {
+            is TransactionFormEvent.Transfer.SetAmount -> {
                 transactionDraft.update {
-                    val draft = it as TransactionDraft.Transfer
+                    val draft = it as TransactionFormDraft.Transfer
 
                     when (event.role) {
-                        TransactionEvent.TransferTransactionEvent.Role.Source -> draft.copy(
+                        TransactionFormEvent.Transfer.Role.Source -> draft.copy(
                             amountSent = event.amount
                         )
 
-                        TransactionEvent.TransferTransactionEvent.Role.Destination -> draft.copy(
+                        TransactionFormEvent.Transfer.Role.Destination -> draft.copy(
                             amountReceived = event.amount
                         )
                     }
                 }
             }
 
-            is TransactionEvent.SetTransactionType -> {
+            is TransactionFormEvent.SetTransactionFormType -> {
                 transactionDraft.update {
                     when (event.type) {
                         com.leeweeder.finlog.ui.transactions.TransactionType.Expense -> {
@@ -178,45 +178,45 @@ internal class ManageTransactionViewModel @Inject constructor(
     }
 }
 
-internal sealed interface TransactionEvent {
-    data class SetTitle(val title: String) : TransactionEvent
-    data class SetCreatedAt(val createdAt: Instant) : TransactionEvent
-    data object ToggleIsPosted : TransactionEvent
-    data class SetPostedAt(val postedAt: Instant) : TransactionEvent
+internal sealed interface TransactionFormEvent {
+    data class SetTitle(val title: String) : TransactionFormEvent
+    data class SetCreatedAt(val createdAt: Instant) : TransactionFormEvent
+    data object ToggleIsPosted : TransactionFormEvent
+    data class SetPostedAt(val postedAt: Instant) : TransactionFormEvent
 
-    data class SetTransactionType(val type: com.leeweeder.finlog.ui.transactions.TransactionType) :
-        TransactionEvent
+    data class SetTransactionFormType(val type: com.leeweeder.finlog.ui.transactions.TransactionType) :
+        TransactionFormEvent
 
-    data object Save : TransactionEvent
+    data object Save : TransactionFormEvent
 
-    sealed interface StandaloneTransactionEvent : TransactionEvent {
-        data class SetAccount(val account: Account) : StandaloneTransactionEvent
-        data class SetType(val type: StandaloneTransactionType) : StandaloneTransactionEvent
-        data class SetAmount(val amount: Amount) : StandaloneTransactionEvent
+    sealed interface Standalone : TransactionFormEvent {
+        data class SetAccount(val account: Account) : Standalone
+        data class SetType(val type: StandaloneTransactionType) : Standalone
+        data class SetAmount(val amount: Amount) : Standalone
     }
 
-    sealed interface TransferTransactionEvent : TransactionEvent {
+    sealed interface Transfer : TransactionFormEvent {
         enum class Role {
             Source,
             Destination
         }
 
-        data class SetAccount(val account: Account, val role: Role) : TransferTransactionEvent
-        data class SetAmount(val amount: Amount, val role: Role) : TransferTransactionEvent
+        data class SetAccount(val account: Account, val role: Role) : Transfer
+        data class SetAmount(val amount: Amount, val role: Role) : Transfer
 
     }
 }
 
-internal sealed interface TransactionDraft {
+internal sealed interface TransactionFormDraft {
     val title: String
     val createdAt: Instant
     val isPosted: Boolean
     val postedAt: Instant?
 
-    fun withTitle(title: String): TransactionDraft
-    fun withCreatedAt(createdAt: Instant): TransactionDraft
-    fun withIsPosted(isPosted: Boolean): TransactionDraft
-    fun withPostedAt(postedAt: Instant): TransactionDraft
+    fun withTitle(title: String): TransactionFormDraft
+    fun withCreatedAt(createdAt: Instant): TransactionFormDraft
+    fun withIsPosted(isPosted: Boolean): TransactionFormDraft
+    fun withPostedAt(postedAt: Instant): TransactionFormDraft
 
     fun toStandalone(type: StandaloneTransactionType): Standalone
     fun toTransfer(): Transfer
@@ -229,20 +229,20 @@ internal sealed interface TransactionDraft {
         val type: StandaloneTransactionType = StandaloneTransactionType.Expense,
         val amount: Amount = Amount.ZERO,
         val selectedAccount: Account? = null,
-    ) : TransactionDraft {
-        override fun withTitle(title: String): TransactionDraft {
+    ) : TransactionFormDraft {
+        override fun withTitle(title: String): TransactionFormDraft {
             return copy(title = title)
         }
 
-        override fun withCreatedAt(createdAt: Instant): TransactionDraft {
+        override fun withCreatedAt(createdAt: Instant): TransactionFormDraft {
             return copy(createdAt = createdAt)
         }
 
-        override fun withIsPosted(isPosted: Boolean): TransactionDraft {
+        override fun withIsPosted(isPosted: Boolean): TransactionFormDraft {
             return copy(isPosted = isPosted)
         }
 
-        override fun withPostedAt(postedAt: Instant): TransactionDraft {
+        override fun withPostedAt(postedAt: Instant): TransactionFormDraft {
             return copy(postedAt = postedAt)
         }
 
@@ -271,20 +271,20 @@ internal sealed interface TransactionDraft {
         val toAccount: Account? = null,
         val amountSent: Amount = Amount.ZERO,
         val amountReceived: Amount = amountSent
-    ) : TransactionDraft {
-        override fun withTitle(title: String): TransactionDraft {
+    ) : TransactionFormDraft {
+        override fun withTitle(title: String): TransactionFormDraft {
             return copy(title = title)
         }
 
-        override fun withCreatedAt(createdAt: Instant): TransactionDraft {
+        override fun withCreatedAt(createdAt: Instant): TransactionFormDraft {
             return copy(createdAt = createdAt)
         }
 
-        override fun withIsPosted(isPosted: Boolean): TransactionDraft {
+        override fun withIsPosted(isPosted: Boolean): TransactionFormDraft {
             return copy(isPosted = isPosted)
         }
 
-        override fun withPostedAt(postedAt: Instant): TransactionDraft {
+        override fun withPostedAt(postedAt: Instant): TransactionFormDraft {
             return copy(postedAt = postedAt)
         }
 
@@ -304,14 +304,14 @@ internal sealed interface TransactionDraft {
     }
 }
 
-internal sealed interface ManageTransactionUiState {
+internal sealed interface TransactionFormUiState {
     data class Success(
-        val draft: TransactionDraft,
+        val draft: TransactionFormDraft,
         val availableAccounts: List<Account>,
-    ) : ManageTransactionUiState
+    ) : TransactionFormUiState
 
-    data object Loading : ManageTransactionUiState
-    data class Error(var throwable: Throwable) : ManageTransactionUiState
+    data object Loading : TransactionFormUiState
+    data class Error(var throwable: Throwable) : TransactionFormUiState
 }
 
 internal enum class TransactionType {
