@@ -30,7 +30,6 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FlexibleBottomAppBar
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.IconButtonShapes
 import androidx.compose.material3.LoadingIndicator
@@ -70,6 +69,7 @@ import com.leeweeder.finlog.domain.exception.account.AccountException
 import com.leeweeder.finlog.domain.model.account.AccountType
 import com.leeweeder.finlog.domain.model.currency.Currency
 import com.leeweeder.finlog.ui.account.components.CurrencyPicker
+import com.leeweeder.finlog.ui.components.IconButton
 import com.leeweeder.finlog.ui.components.OutlinedTextField
 import com.leeweeder.finlog.ui.components.bottom_sheet.FinLogBottomSheetProvider
 import com.leeweeder.finlog.ui.components.bottom_sheet.LocalBottomSheetController
@@ -128,13 +128,10 @@ private fun ManageAccountScreen(
                 },
                 navigationIcon = {
                     IconButton(
-                        onClick = onNavigateBack
-                    ) {
-                        Icon(
-                            imageVector = arrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
+                        onClick = onNavigateBack,
+                        icon = arrowBack,
+                        contentDescription = "Go to previous screen"
+                    )
                 }
             )
         },

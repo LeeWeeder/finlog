@@ -21,7 +21,7 @@ import kotlin.time.Clock
 import kotlin.time.Instant
 
 @HiltViewModel
-internal class TransactionsViewModel @Inject constructor(
+internal class ManageTransactionViewModel @Inject constructor(
     accountRepository: AccountRepository,
     private val transactionRepository: TransactionRepository
 ) : ViewModel() {
@@ -32,7 +32,7 @@ internal class TransactionsViewModel @Inject constructor(
         accountRepository.observeActiveAccounts(),
         transactionDraft
     ) { activeAccounts, draft ->
-        TransactionsUiState.Success(
+        ManageTransactionUiState.Success(
             draft = when (draft) {
                 is TransactionDraft.Standalone -> draft.copy(
                     selectedAccount = activeAccounts.first()
@@ -45,11 +45,11 @@ internal class TransactionsViewModel @Inject constructor(
             availableAccounts = activeAccounts,
         )
     }.catch { throwable ->
-        TransactionsUiState.Error(throwable)
+        ManageTransactionUiState.Error(throwable)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = TransactionsUiState.Loading
+        initialValue = ManageTransactionUiState.Loading
     )
 
     fun onEvent(event: TransactionEvent) {
@@ -304,14 +304,14 @@ internal sealed interface TransactionDraft {
     }
 }
 
-internal sealed interface TransactionsUiState {
+internal sealed interface ManageTransactionUiState {
     data class Success(
         val draft: TransactionDraft,
         val availableAccounts: List<Account>,
-    ) : TransactionsUiState
+    ) : ManageTransactionUiState
 
-    data object Loading : TransactionsUiState
-    data class Error(var throwable: Throwable) : TransactionsUiState
+    data object Loading : ManageTransactionUiState
+    data class Error(var throwable: Throwable) : ManageTransactionUiState
 }
 
 internal enum class TransactionType {
