@@ -1,4 +1,4 @@
-package com.leeweeder.finlog.ui.account.components
+package com.leeweeder.finlog.ui.accounts.components
 
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.animateDp

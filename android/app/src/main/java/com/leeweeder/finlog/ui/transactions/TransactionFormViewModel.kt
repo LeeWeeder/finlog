@@ -8,6 +8,9 @@ import com.leeweeder.finlog.domain.model.transaction.Transaction
 import com.leeweeder.finlog.domain.model.transaction.TransactionType
 import com.leeweeder.finlog.domain.repository.AccountRepository
 import com.leeweeder.finlog.domain.repository.TransactionRepository
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -16,17 +19,39 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 import kotlin.time.Clock
 import kotlin.time.Instant
 
-@HiltViewModel
-internal class TransactionFormViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = TransactionFormViewModel.Factory::class)
+internal class TransactionFormViewModel @AssistedInject constructor(
+    @Assisted private val transactionId: Long?,
+    @Assisted private val transactionType: com.leeweeder.finlog.ui.transactions.TransactionType,
     accountRepository: AccountRepository,
     private val transactionRepository: TransactionRepository
 ) : ViewModel() {
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            transactionId: Long?,
+            transactionType: com.leeweeder.finlog.ui.transactions.TransactionType
+        ): TransactionFormViewModel
+    }
+
     private val transactionDraft: MutableStateFlow<TransactionFormDraft> =
-        MutableStateFlow(TransactionFormDraft.Standalone())
+        MutableStateFlow(
+            when (transactionType) {
+                com.leeweeder.finlog.ui.transactions.TransactionType.Expense -> TransactionFormDraft.Standalone(
+                    standaloneTransactionType = StandaloneTransactionType.Expense
+                )
+
+                com.leeweeder.finlog.ui.transactions.TransactionType.Income -> TransactionFormDraft.Standalone(
+                    standaloneTransactionType = StandaloneTransactionType.Income
+                )
+
+                com.leeweeder.finlog.ui.transactions.TransactionType.Transfer -> TransactionFormDraft.Transfer()
+            }
+        )
 
     val uiState = combine(
         accountRepository.observeActiveAccounts(),
@@ -62,7 +87,7 @@ internal class TransactionFormViewModel @Inject constructor(
                                 Transaction(
                                     accountId = draft.selectedAccount!!.id,
                                     amount = draft.amount,
-                                    transactionType = when (draft.type) {
+                                    transactionType = when (draft.standaloneTransactionType) {
                                         StandaloneTransactionType.Expense -> TransactionType.Expense
                                         StandaloneTransactionType.Income -> TransactionType.Income
                                     },
@@ -104,9 +129,11 @@ internal class TransactionFormViewModel @Inject constructor(
             }
 
             is TransactionFormEvent.Standalone.SetAmount -> {
+                val amount = Amount(event.amountInString.toBigDecimalOrNull() ?: return)
+
                 transactionDraft.update {
                     (it as TransactionFormDraft.Standalone).copy(
-                        amount = event.amount
+                        amount = amount
                     )
                 }
             }
@@ -114,7 +141,7 @@ internal class TransactionFormViewModel @Inject constructor(
             is TransactionFormEvent.Standalone.SetType -> {
                 transactionDraft.update {
                     (it as TransactionFormDraft.Standalone).copy(
-                        type = event.type
+                        standaloneTransactionType = event.type
                     )
                 }
             }
@@ -142,16 +169,18 @@ internal class TransactionFormViewModel @Inject constructor(
             }
 
             is TransactionFormEvent.Transfer.SetAmount -> {
+                val amount = Amount(event.amountInString.toBigDecimalOrNull() ?: return)
+
                 transactionDraft.update {
                     val draft = it as TransactionFormDraft.Transfer
 
                     when (event.role) {
                         TransactionFormEvent.Transfer.Role.Source -> draft.copy(
-                            amountSent = event.amount
+                            amountSent = amount
                         )
 
                         TransactionFormEvent.Transfer.Role.Destination -> draft.copy(
-                            amountReceived = event.amount
+                            amountReceived = amount
                         )
                     }
                 }
@@ -192,7 +221,7 @@ internal sealed interface TransactionFormEvent {
     sealed interface Standalone : TransactionFormEvent {
         data class SetAccount(val account: Account) : Standalone
         data class SetType(val type: StandaloneTransactionType) : Standalone
-        data class SetAmount(val amount: Amount) : Standalone
+        data class SetAmount(val amountInString: String) : Standalone
     }
 
     sealed interface Transfer : TransactionFormEvent {
@@ -202,7 +231,7 @@ internal sealed interface TransactionFormEvent {
         }
 
         data class SetAccount(val account: Account, val role: Role) : Transfer
-        data class SetAmount(val amount: Amount, val role: Role) : Transfer
+        data class SetAmount(val amountInString: String, val role: Role) : Transfer
 
     }
 }
@@ -212,6 +241,8 @@ internal sealed interface TransactionFormDraft {
     val createdAt: Instant
     val isPosted: Boolean
     val postedAt: Instant?
+
+    val transactionType: com.leeweeder.finlog.ui.transactions.TransactionType
 
     fun withTitle(title: String): TransactionFormDraft
     fun withCreatedAt(createdAt: Instant): TransactionFormDraft
@@ -226,10 +257,15 @@ internal sealed interface TransactionFormDraft {
         override val createdAt: Instant = Clock.System.now(),
         override val isPosted: Boolean = false,
         override val postedAt: Instant? = if (isPosted) createdAt else null,
-        val type: StandaloneTransactionType = StandaloneTransactionType.Expense,
+        val standaloneTransactionType: StandaloneTransactionType,
         val amount: Amount = Amount.ZERO,
-        val selectedAccount: Account? = null,
+        val selectedAccount: Account? = null
     ) : TransactionFormDraft {
+        override val transactionType: com.leeweeder.finlog.ui.transactions.TransactionType
+            get() = if (standaloneTransactionType == StandaloneTransactionType.Income)
+                com.leeweeder.finlog.ui.transactions.TransactionType.Income
+            else com.leeweeder.finlog.ui.transactions.TransactionType.Expense
+
         override fun withTitle(title: String): TransactionFormDraft {
             return copy(title = title)
         }
@@ -247,7 +283,7 @@ internal sealed interface TransactionFormDraft {
         }
 
         override fun toStandalone(type: StandaloneTransactionType): Standalone {
-            return copy(type = type)
+            return copy(standaloneTransactionType = type)
         }
 
         override fun toTransfer(): Transfer {
@@ -272,6 +308,9 @@ internal sealed interface TransactionFormDraft {
         val amountSent: Amount = Amount.ZERO,
         val amountReceived: Amount = amountSent
     ) : TransactionFormDraft {
+        override val transactionType: com.leeweeder.finlog.ui.transactions.TransactionType
+            get() = com.leeweeder.finlog.ui.transactions.TransactionType.Transfer
+
         override fun withTitle(title: String): TransactionFormDraft {
             return copy(title = title)
         }
@@ -296,7 +335,7 @@ internal sealed interface TransactionFormDraft {
                 postedAt = postedAt,
                 selectedAccount = fromAccount,
                 amount = amountSent,
-                type = type
+                standaloneTransactionType = type
             )
         }
 

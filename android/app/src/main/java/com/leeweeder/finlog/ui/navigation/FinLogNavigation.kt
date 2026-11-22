@@ -9,9 +9,11 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.leeweeder.finlog.ui.account.AccountFormScreen
-import com.leeweeder.finlog.ui.account.AccountFormViewModel
+import com.leeweeder.finlog.ui.accounts.AccountFormScreen
+import com.leeweeder.finlog.ui.accounts.AccountFormViewModel
 import com.leeweeder.finlog.ui.home.HomeScreen
+import com.leeweeder.finlog.ui.transactions.TransactionFormScreen
+import com.leeweeder.finlog.ui.transactions.TransactionFormViewModel
 
 @Composable
 internal fun FinLogNavigation() {
@@ -31,19 +33,41 @@ internal fun FinLogNavigation() {
                     val navigator = LocalFinLogNavigator.current
 
                     HomeScreen(
-                        onNavigateToManageAccount = {
-                            navigator.toManageAccount(it)
+                        onNavigateToAccountForm = {
+                            navigator.toAccountForm(it)
+                        },
+                        onNavigateToTransactionForm = { id, transactionType ->
+                            navigator.toTransactionForm(id, transactionType)
                         }
                     )
                 }
 
-                entry<Screen.ManageAccount> { key ->
+                entry<Screen.AccountForm> { key ->
                     val viewModel =
                         hiltViewModel<AccountFormViewModel, AccountFormViewModel.Factory>(
                             creationCallback = { factory -> factory.create(key.accountId) }
                         )
 
                     AccountFormScreen(
+                        viewModel = viewModel,
+                        onNavigateBack = {
+                            navigator.back()
+                        }
+                    )
+                }
+
+                entry<Screen.TransactionForm> { key ->
+                    val viewModel =
+                        hiltViewModel<TransactionFormViewModel, TransactionFormViewModel.Factory>(
+                            creationCallback = { factory ->
+                                factory.create(
+                                    key.transactionId,
+                                    key.transactionType
+                                )
+                            }
+                        )
+
+                    TransactionFormScreen(
                         viewModel = viewModel,
                         onNavigateBack = {
                             navigator.back()

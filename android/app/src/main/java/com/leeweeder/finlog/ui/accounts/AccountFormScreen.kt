@@ -1,11 +1,10 @@
-package com.leeweeder.finlog.ui.account
+package com.leeweeder.finlog.ui.accounts
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,7 +22,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -38,8 +36,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.ToggleButton
-import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -54,9 +50,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -68,9 +61,10 @@ import com.leeweeder.finlog.R
 import com.leeweeder.finlog.domain.exception.account.AccountException
 import com.leeweeder.finlog.domain.model.account.AccountType
 import com.leeweeder.finlog.domain.model.currency.Currency
-import com.leeweeder.finlog.ui.account.components.CurrencyPicker
+import com.leeweeder.finlog.ui.accounts.components.CurrencyPicker
 import com.leeweeder.finlog.ui.components.IconButton
 import com.leeweeder.finlog.ui.components.OutlinedTextField
+import com.leeweeder.finlog.ui.components.SelectionButton
 import com.leeweeder.finlog.ui.components.bottom_sheet.FinLogBottomSheetProvider
 import com.leeweeder.finlog.ui.components.bottom_sheet.LocalBottomSheetController
 import com.leeweeder.finlog.ui.icons.add
@@ -213,39 +207,17 @@ private fun AccountFormScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     item {
-                        FlowRow(
-                            Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
-                            verticalArrangement = Arrangement.spacedBy(2.dp),
-                        ) {
-                            AccountTypeDisplay.entries.forEach { item ->
-                                ToggleButton(
-                                    checked = item.accountType == loaded.accountType,
-                                    onCheckedChange = {
-                                        onEvent(
-                                            AccountFormEvent.ChangeAccountFormType(item.accountType)
-                                        )
-                                    },
-                                    shapes =
-                                        when (item.ordinal) {
-                                            0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
-                                            AccountTypeDisplay.entries.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
-                                            else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
-                                        },
-                                    modifier = Modifier
-                                        .semantics { role = Role.RadioButton }
-                                        .weight(1f),
-                                ) {
-                                    Icon(
-                                        item.icon,
-                                        contentDescription = item.label,
-                                        modifier = Modifier.size(ToggleButtonDefaults.IconSize)
-                                    )
-                                    Spacer(Modifier.size(ToggleButtonDefaults.IconSpacing))
-                                    Text(item.label)
-                                }
-                            }
-                        }
+                        SelectionButton(
+                            AccountTypeDisplay.entries.toList(),
+                            selectedItem = {
+                                it.accountType == loaded.accountType
+                            },
+                            onSelectedChange = {
+                                onEvent(AccountFormEvent.ChangeAccountFormType(it.accountType))
+                            },
+                            label = { it.label },
+                            icon = { it.icon }
+                        )
                     }
 
                     item {

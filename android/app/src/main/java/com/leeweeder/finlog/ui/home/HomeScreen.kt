@@ -44,17 +44,19 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.leeweeder.finlog.domain.model.Amount
 import com.leeweeder.finlog.ui.icons.add
 import com.leeweeder.finlog.ui.icons.addCard
+import com.leeweeder.finlog.ui.icons.arrowCircleDown
+import com.leeweeder.finlog.ui.icons.arrowCircleUp
 import com.leeweeder.finlog.ui.icons.close
-import com.leeweeder.finlog.ui.icons.paymentArrowDown
-import com.leeweeder.finlog.ui.icons.paymentArrowUp
-import com.leeweeder.finlog.ui.icons.sendMoney
+import com.leeweeder.finlog.ui.icons.swapHorizontalCircle
+import com.leeweeder.finlog.ui.transactions.TransactionType
 import java.math.BigDecimal
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
-    onNavigateToManageAccount: (id: Long?) -> Unit
+    onNavigateToAccountForm: (id: Long?) -> Unit,
+    onNavigateToTransactionForm: (id: Long?, transactionType: TransactionType) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -64,15 +66,17 @@ internal fun HomeScreen(
     }
 
     HomeScreen(
-        uiState as HomeUiState.Success,
-        onNavigateToManageAccount = onNavigateToManageAccount
+        uiState = uiState as HomeUiState.Success,
+        onNavigateToAccountForm = onNavigateToAccountForm,
+        onNavigateToTransactionForm = onNavigateToTransactionForm
     )
 }
 
 @Composable
 private fun HomeScreen(
     uiState: HomeUiState.Success,
-    onNavigateToManageAccount: (id: Long?) -> Unit
+    onNavigateToAccountForm: (id: Long?) -> Unit,
+    onNavigateToTransactionForm: (id: Long?, transactionType: TransactionType) -> Unit
 ) {
     var isFabExpanded by remember { mutableStateOf(false) }
 
@@ -113,10 +117,21 @@ private fun HomeScreen(
                     FloatingActionButtonMenuItem(
                         onClick = {
                             when (action) {
-                                FloatingButtonActions.Account -> onNavigateToManageAccount(null)
-                                FloatingButtonActions.Transfer -> TODO()
-                                FloatingButtonActions.Income -> TODO()
-                                FloatingButtonActions.Expense -> TODO()
+                                FloatingButtonActions.Account -> onNavigateToAccountForm(null)
+                                FloatingButtonActions.Transfer -> onNavigateToTransactionForm(
+                                    null,
+                                    TransactionType.Transfer
+                                )
+
+                                FloatingButtonActions.Income -> onNavigateToTransactionForm(
+                                    null,
+                                    TransactionType.Income
+                                )
+
+                                FloatingButtonActions.Expense -> onNavigateToTransactionForm(
+                                    null,
+                                    TransactionType.Expense
+                                )
                             }
                         },
                         text = {
@@ -173,7 +188,7 @@ private fun HomeScreen(
                     items(uiState.accountsWithBalance) { accountWithBalance ->
                         ElevatedCard(
                             onClick = {
-                                onNavigateToManageAccount(accountWithBalance.account.id)
+                                onNavigateToAccountForm(accountWithBalance.account.id)
                             },
                             modifier = Modifier.width(160.dp),
                             shape = MaterialTheme.shapes.extraLarge
@@ -211,9 +226,9 @@ private enum class FloatingButtonActions(
     val label: String
 ) {
     Account(addCard, "Add account"),
-    Transfer(sendMoney, "Add transfer"),
-    Income(paymentArrowDown, "Add income"),
-    Expense(paymentArrowUp, "Add expense")
+    Transfer(swapHorizontalCircle, "Transfer"),
+    Income(arrowCircleDown, "Add income"),
+    Expense(arrowCircleUp, "Add expense")
 }
 
 @Composable

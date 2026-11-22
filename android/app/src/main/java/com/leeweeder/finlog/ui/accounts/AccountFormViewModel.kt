@@ -1,4 +1,4 @@
-package com.leeweeder.finlog.ui.account
+package com.leeweeder.finlog.ui.accounts
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -43,14 +43,14 @@ internal class AccountFormViewModel @AssistedInject constructor(
         initialValue = null
     )
 
-    private val _AccountFormDraft = MutableStateFlow(AccountFormDraft())
+    private val _accountFormDraft = MutableStateFlow(AccountFormDraft())
 
     init {
         viewModelScope.launch {
             if (accountId != null) {
                 val account = accountRepository.getById(accountId) ?: return@launch
 
-                _AccountFormDraft.update {
+                _accountFormDraft.update {
                     it.copy(
                         name = account.name,
                         accountType = account.type,
@@ -66,7 +66,7 @@ internal class AccountFormViewModel @AssistedInject constructor(
     val eventFlow = _eventChannel.receiveAsFlow()
 
     val uiState = combine(
-        _AccountFormDraft,
+        _accountFormDraft,
         currencies
     ) { draft, currencies ->
         if (currencies == null) {
@@ -108,7 +108,7 @@ internal class AccountFormViewModel @AssistedInject constructor(
     }
 
     private fun onChangeCurrency(currency: Currency) {
-        _AccountFormDraft.update {
+        _accountFormDraft.update {
             it.copy(
                 currencyCode = currency.code,
                 decimalPlaces = if (currency is Currency.FiatCurrency) currency.digits else it.decimalPlaces
@@ -117,13 +117,13 @@ internal class AccountFormViewModel @AssistedInject constructor(
     }
 
     private fun onSetName(newName: String) {
-        _AccountFormDraft.update {
+        _accountFormDraft.update {
             it.copy(name = newName, hasNameTakenError = false)
         }
     }
 
     private fun onChangeAccountType(accountType: AccountType) {
-        _AccountFormDraft.update {
+        _accountFormDraft.update {
             it.copy(
                 accountType = accountType
             )
@@ -131,7 +131,7 @@ internal class AccountFormViewModel @AssistedInject constructor(
     }
 
     private fun onSetDecimalPrecision(digits: Int) {
-        _AccountFormDraft.update {
+        _accountFormDraft.update {
             it.copy(decimalPlaces = digits)
         }
     }
@@ -161,7 +161,7 @@ internal class AccountFormViewModel @AssistedInject constructor(
 
                 _eventChannel.send(AccountFormUiEvent.PrimaryActionSuccess)
             } catch (_: AccountException.NameTaken) {
-                _AccountFormDraft.update {
+                _accountFormDraft.update {
                     it.copy(hasNameTakenError = true)
                 }
             }
